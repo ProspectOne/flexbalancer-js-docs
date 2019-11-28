@@ -60,7 +60,7 @@ async function onRequest(req: IRequest, res: IResponse) {
             (provider) => provider.name in countriesAnswersRoundRobin[requestCountry] && isProperCandidate(provider, requireMonitorData)
         );
         // If we found proper geo candidates, return one of them by random
-        if (geoFilteredCandidates) {
+        if (geoFilteredCandidates.length) {
             return {
                 addr: getRandomElement(geoFilteredCandidates).cname,
                 ttl: defaultTtl
@@ -72,7 +72,7 @@ async function onRequest(req: IRequest, res: IResponse) {
     const properCandidates = providers.filter(item => isProperCandidate(item, requireMonitorData));
 
     //Choose random candidate as response if we have any
-    if (properCandidates) {
+    if (properCandidates.length) {
         return {
             addr: getRandomElement(properCandidates).cname,
             ttl: defaultTtl
