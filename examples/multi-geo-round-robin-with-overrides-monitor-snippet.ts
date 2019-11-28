@@ -57,7 +57,8 @@ async function onRequest(req: IRequest, res: IResponse) {
     if (requestCountry && countriesAnswersRoundRobin[requestCountry]) {
         // Choose candidates that are listed in countriesAnswersRoundRobin and are proper candidates
         let geoFilteredCandidates = providers.filter(
-            (provider) => countriesAnswersRoundRobin[requestCountry].includes(provider.name) && isProperCandidate(provider, requireMonitorData)
+            (provider) => countriesAnswersRoundRobin[requestCountry].includes(provider.name)
+                && isProperCandidate(provider, requireMonitorData)
         );
         // If we found proper geo candidates, return one of them by random
         if (geoFilteredCandidates.length) {
