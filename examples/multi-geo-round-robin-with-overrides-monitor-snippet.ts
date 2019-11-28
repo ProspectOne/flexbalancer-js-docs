@@ -81,7 +81,7 @@ async function onRequest(req: IRequest, res: IResponse) {
     }
     // Fallback pick 'origin' cname
     return {
-        addr: providers['origin'].cname,
+        addr: providers.find(provider => provider.name === 'origin').cname,
         ttl: defaultTtl
     };
 }
