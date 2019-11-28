@@ -1,10 +1,12 @@
 // Optimal Round Trip Time with Sonar Availability
+// Main configuration
 const configuration = {
+    /** List of  providers configuration*/
     providers: [
         {
-            name: ('jsdelivr-cdn' as TCDNProvider),
-            monitorId: (301 as TMonitor),
-            cname: 'www.foo.com'
+            name: ('jsdelivr-cdn' as TCDNProvider), // CDN Provider alias to work with
+            monitorId: (301 as TMonitor), // Monitor ID which is created by user to monitor hostname
+            cname: 'www.foo.com' // cname to pick as a result
         },
         {
             name: ('cloudflare' as TCDNProvider),
@@ -17,54 +19,73 @@ const configuration = {
             cname: 'www.baz.com'
         }
     ],
-
-    // The DNS TTL to be applied to DNS responses in seconds.
-    defaultTtl: 20,
-    availabilityThreshold: 90
+    defaultTtl: 20, // The DNS TTL to be applied to DNS responses in seconds.
+    availabilityThreshold: 90 // Board value for providers to compare with
 };
-
+/**
+ * returns index of Highest value in array
+ * @param array
+ */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
+/**
+ * returns object which have highest value of property
+ * @param array
+ * @param property
+ */
 const getHighestByProperty = <T>(array: T[], property):T => array[getHighest(array.map(item => item[property]))];
+/**
+ * returns index of Lowest value in array
+ * @param array
+ */
 const getLowest = (array: number[]): number => array.indexOf(Math.min(...array));
+/**
+ * returns object which have lowest value in property
+ * @param array
+ * @param property
+ */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
 async function onRequest(req: Request, res: Response) {
     const { providers, defaultTtl, availabilityThreshold } = configuration;
-
+    // Filter providers by monitor, check it's state to be 'UP'
     const monitorFilteredProviders = providers.filter(
         (provider) => isMonitorOnline(provider.monitorId)
     );
-    // If all providers are down return random
+    // If all monitors are 'DOWN' state, choose random provider.
     if (monitorFilteredProviders.length === 0) {
         return {
             addr: providers[Math.floor(Math.random() * providers.length)].cname,
             ttl: defaultTtl
         }
     }
+    // Filter from result. Choose providers that have 'UPTIME' value more that threshold.
     const availableFilteredProviders = monitorFilteredProviders.filter(
         (provider) => fetchCdnRumUptime(provider.name) > availabilityThreshold
     );
-    // If available providers return with lowest performance
+    // If list filter result is not empty
     if (availableFilteredProviders.length) {
+        // Create array map with performance data for each providers left in result
         const perfProvidersData = availableFilteredProviders.map(
             (provider) => ({
                 provider,
                 perf: fetchCdnRumPerformance(provider.name)
             })
         );
+        // Return as a result Object with defaultTtl and take providers from array with lowest performance value
         return {
             addr: getLowestByProperty(perfProvidersData, 'perf').provider.cname,
             ttl: defaultTtl
         }
     }
 
-    // Fallback. Take highest performance from All providers
+    // Fallback. Create array map with performance data for each providers from original list
     const perfProvidersData = providers.map(
         (provider) => ({
             provider,
             perf: fetchCdnRumPerformance(provider.name)
         })
     );
+    // Return as a result Object with defaultTtl and take providers from array with highest performance value
     return {
         addr: getHighestByProperty(perfProvidersData, 'perf').provider.cname,
         ttl: defaultTtl
