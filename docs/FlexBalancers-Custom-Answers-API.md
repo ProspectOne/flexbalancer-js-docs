@@ -296,9 +296,26 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
+**fetchCdnRumUptime(provider: TCDNProvider): number**
+
+Returns world uptime value for particular CDN provider. 
+
+* **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
+
+```typescript
+async function onRequest(req: IRequest, res: IResponse) {
+    if(fetchCdnRumUptime('jsdelivr-cdn') > 98.5) {
+    ...
+    }
+...
+}
+```
+
+Can be overloaded and used with additional parameters:
+
 **fetchCdnRumUptime(provider: TCDNProvider, selector?, identifier?): number**
 
-Returns uptime value for particular CDN provider. If is used with the first parameter only (fetchCdnRumUptime(provider: TCDNProvider): number) - returns world uptime value. 
+Returns location-based uptime value for particular CDN provider.
 
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 * **selector** - *(TRUMLocationSelectorContinent | TRUMLocationSelectorCountry | TRUMLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
@@ -306,10 +323,6 @@ Returns uptime value for particular CDN provider. If is used with the first para
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    if(fetchCdnRumUptime('jsdelivr-cdn') > 98.5) {
-    ...
-    }
-    ...
     if(fetchCdnRumUptime('jsdelivr-cdn', 'continent', 'EU') > 99) {
     ...
     }
@@ -317,9 +330,26 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
+**fetchCdnRumPerformance(provider: TCDNProvider): number**
+
+Similar to the previous function but returns RUM Performance value. Returns world performance value.
+
+* **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
+
+```typescript
+async function onRequest(req: IRequest, res: IResponse) {
+    if(fetchCdnRumPerformance('jsdelivr-cdn') > 98.5) {
+    ...
+    }
+...
+}
+```
+
+Can be overloaded and used with additional parameters:
+
 **fetchCdnRumPerformance(provider: TCDNProvider, selector?, identifier?): number**
 
-Similar to the previous function but returns RUM Performance value. If is used with the first parameter only - returns world performance value. 
+Returns location-based performance value. 
 
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 * **selector** - *(TRUMLocationSelectorContinent | TRUMLocationSelectorCountry | TRUMLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
@@ -327,10 +357,6 @@ Similar to the previous function but returns RUM Performance value. If is used w
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    if(fetchCdnRumPerformance('jsdelivr-cdn') > 98.5) {
-    ...
-    }
-    ...
     if(fetchCdnRumPerformance('jsdelivr-cdn', 'country', 'FR') > 99) {
     ...
     }
