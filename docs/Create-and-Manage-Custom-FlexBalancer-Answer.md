@@ -55,6 +55,17 @@ Now you can see your newly created FlexBalancer at `FlexBalancers` page:
 
 ![Alt text](img/create_page_9.png?raw=true "Create Step 9")
 
+Let's check if your Custom Answer works. After some time, when you already have made all nessessary `CNAME` changes - check CDN RUM Uptime at [CDNPerf](https://www.cdnperf.com/).
+ You can see that RUM Uptime is higher than `98,5`.
+ 
+![Alt text](img/cdn_statistics.png?raw=true "CDN Statistics 1")
+
+So, according to rules that you have defined at Custom Answer, it should return `google.com` as response address. 
+
+![Alt text](img/dig_results.png?raw=true "Dig results 1")
+
+And it does! That means your FlexBalancer works perfectly!
+
 ## Edit FlexBalancer with custom answer
 
 To change your custom answer, proceed to `FlexBalancers` page and press square button with pen at your Balancer:
