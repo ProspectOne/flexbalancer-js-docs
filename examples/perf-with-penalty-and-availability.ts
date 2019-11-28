@@ -12,12 +12,12 @@ const configuration = {
         {
             name: 'akamai' as TCDNProvider,
             cname: 'www.bar.com',
-            padding: 10
+            padding: 0,
         },
         {
             name: 'cloudflare' as TCDNProvider,
             cname: 'www.baz.com',
-            padding: 0
+            padding: 5,
         }
     ],
 
@@ -48,13 +48,20 @@ async function onRequest(req: IRequest, res: IResponse) {
     let decision;
 
     // Filter by availability threshold
-    const availableProviders = providers.filter(provider => fetchCdnRumUptime(provider.name) > availabilityThreshold);
+    const availableProviders = providers.filter(
+        (provider) => (req.location.country ?
+            fetchCdnRumUptime(provider.name, 'country', req.location.country) :
+            fetchCdnRumUptime(provider.name)) > availabilityThreshold);
 
     // Get performance and apply paddings for available providers
     const providersPerformance = availableProviders.map(
         (provider) => ({
             provider,
-            performance: fetchCdnRumPerformance(provider.name) + provider.padding
+            performance: req.location.country ?
+                // Get performance for country if we know it
+                fetchCdnRumPerformance(provider.name, 'country', req.location.country) + provider.padding :
+                // Get global performance instead
+                fetchCdnRumPerformance(provider.name) + provider.padding
         })
     );
 
