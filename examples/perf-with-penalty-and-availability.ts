@@ -22,46 +22,57 @@ const configuration = {
     ],
 
     // Default provider which will be chosen if no suitable providers will be found.
-    default_provider: 'jsdelivr-cdn',
+    defaultProvider: 'jsdelivr-cdn',
 
     // The TTL to be set when the application chooses a provider.
-    default_ttl: 30,
+    defaultTtl: 30,
 
     // Minimum threshold under which provider will be considered unavailable
-    availability_threshold: 97,
+    availabilityThreshold: 97,
 };
 
+/**
+ * returns index of Lowest value in array
+ * @param array
+ */
+const getLowest = (array: number[]): number => array.indexOf(Math.min(...array));
+/**
+ * returns object which have lowest value in property
+ * @param array
+ * @param property
+ */
+const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
+
 async function onRequest(req: IRequest, res: IResponse) {
-    // Get availability for each provider
-    const providersAvailability = configuration.providers.map((provider) => {
-        return { provider, availability: fetchCdnRumUptime(provider.name) }
-    });
+    const {availabilityThreshold, defaultProvider, providers, defaultTtl} = configuration;
+    let decision;
 
     // Filter by availability threshold
-    const availableProviders = providersAvailability.filter(data => data.availability > configuration.availability_threshold);
+    const availableProviders = providers.filter(provider => fetchCdnRumUptime(provider.name) > availabilityThreshold);
 
     // Get performance and apply paddings for available providers
-    const providersPerformance = availableProviders.map(data => ({
-        provider: data.provider,
-        performance: fetchCdnRumPerformance(data.provider.name) + data.provider.padding
-    }));
-
-    // Start decision process
-    let decision: any = null;
+    const providersPerformance = availableProviders.map(
+        (provider) => ({
+            provider,
+            performance: fetchCdnRumPerformance(provider.name) + provider.padding
+        })
+    );
 
     // If we have a providers to choose from - choose one with the best performance
     if (providersPerformance.length) {
-        decision = providersPerformance.sort((a, b) => a.performance - b.performance)[0].provider;
+        decision = getLowestByProperty(providersPerformance, 'performance').provider;
+        return {
+            addr: decision.cname,
+            ttl: decision.ttl ? decision.ttl : defaultTtl
+        };
     }
 
     // No available providers - return default
-    if (!decision) {
-        decision = configuration.providers.find(provider => provider.name === configuration.default_provider)
-    }
+    decision = providers.find(provider => provider.name === defaultProvider);
 
     // Prepare response
-    res.addr = decision.cname;
-    res.ttl = decision.ttl ? decision.ttl : configuration.default_ttl;
-
-    return res;
+    return {
+        addr: decision.cname,
+        ttl: decision.ttl ? decision.ttl : defaultTtl
+    }
 }
