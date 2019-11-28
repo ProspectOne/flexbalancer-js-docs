@@ -14,7 +14,11 @@ Then, fill in your `fallback` address. You may also select desired `TTL`. Then, 
 
 ![Alt text](img/create_page_3.png?raw=true "Create Step 3")
 
-Now, you have text editor open, so you can write or post there your custom code (supported language: `TypeScript`):
+Now, you have text editor open, so you can write or post there your custom code.
+
+Supported language: `TypeScript`.
+
+Editor: Monaco Editor, see [Monaco Editor Accessibility Guide](https://github.com/microsoft/monaco-editor/wiki/Monaco-Editor-Accessibility-Guide) for detailed info. 
 
 ![Alt text](img/create_page_4.png?raw=true "Create Step 4")
 
@@ -57,7 +61,7 @@ To change your custom answer, proceed to `FlexBalancers` page and press square b
 
 ![Alt text](img/edit_flex_1.png?raw=true "Edit Step 1")
 
-You can edit your code, FlexBalancer name, Fallback and TTL:
+You can edit your code, FlexBalancer description, Fallback and TTL:
 
 ![Alt text](img/edit_flex_2.png?raw=true "Edit Step 2")
 
