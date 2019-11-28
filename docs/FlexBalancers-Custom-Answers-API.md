@@ -338,7 +338,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-**lookupCity(ip: string):Promise<ICityResponse | null>**
+*async* **lookupCity(ip: string):Promise<ICityResponse | null>**
 
 Finds the city IP belongs to. Resolves result that implements  `ICityResponse` or `null` if IP does not belong to any city.
 
@@ -350,7 +350,7 @@ Finds the city IP belongs to. Resolves result that implements  `ICityResponse` o
 
 Can be overloaded and used with additional parameters:
 
-**lookupCity(ip: string, target: number, threshold: number):Promise<boolean>**
+*async* **lookupCity(ip: string, target: number, threshold: number):Promise<boolean>**
 
 Finds if IP belongs to particular city. Resolves `boolean`.
 
@@ -362,7 +362,7 @@ Finds if IP belongs to particular city. Resolves `boolean`.
 // ToDo example
 ```
 
-**lookupState(ip: string):Promise<IStateResponse | null>**
+*async* **lookupState(ip: string):Promise<IStateResponse | null>**
 
 Finds the US state IP belongs to. Resolves result that implements  `IStateResponse` or `null` if IP does not belong to the US.
 
@@ -374,7 +374,7 @@ Finds the US state IP belongs to. Resolves result that implements  `IStateRespon
 
 Can be overloaded and used with additional parameters:
 
-**lookupState(ip: string, target: TCountry, threshold: number):Promise<boolean>**
+*async* **lookupState(ip: string, target: TCountry, threshold: number):Promise<boolean>**
 
 Finds if IP belongs to particular country. Resolves `boolean`.
 
@@ -386,7 +386,7 @@ Finds if IP belongs to particular country. Resolves `boolean`.
 // ToDo example
 ```
 
-**lookupCountry(ip: string):Promise<ICountryResponse>**
+*async* **lookupCountry(ip: string):Promise<ICountryResponse>**
 
 Finds the country IP belongs to. Resolves result that implements  `ICountryResponse`.
 
@@ -398,7 +398,7 @@ Finds the country IP belongs to. Resolves result that implements  `ICountryRespo
 
 Can be overloaded and used with additional parameters:
 
-**lookupCountry(ip: string, target: TCountry, threshold: number):Promise<boolean>**
+*async* **lookupCountry(ip: string, target: TCountry, threshold: number):Promise<boolean>**
 
 Finds if IP belongs to particular country. Resolves `boolean`.
 
@@ -410,7 +410,7 @@ Finds if IP belongs to particular country. Resolves `boolean`.
 // ToDo example
 ```
 
-**lookupContinent(ip: string): Promise<IContinentResponse>**
+*async* **lookupContinent(ip: string): Promise<IContinentResponse>**
 
 Finds the continent IP belongs to. Resolves result that implements  `IContinentResponse`.
 
@@ -422,7 +422,7 @@ Finds the continent IP belongs to. Resolves result that implements  `IContinentR
 
 Can be overloaded and used with additional parameters:
 
-**lookupContinent(ip: string, target: TContinent, threshold: number): Promise<boolean>**
+*async* **lookupContinent(ip: string, target: TContinent, threshold: number): Promise<boolean>**
 
 Finds if IP belongs to particular continent. If Promise is fulfilled - resolves `boolean`. 
 
