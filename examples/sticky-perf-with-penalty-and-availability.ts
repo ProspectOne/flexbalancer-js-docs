@@ -1,46 +1,38 @@
-type Configuration = {
-    providers: {
-        name: TCDNProvider;
-        cname: string;
-        padding: number;
-        ttl?: number;
-    }[],
-    default_provider: TCDNProvider;
-    default_ttl: number;
-    availability_threshold: number;
-}
-
-const configuration: Configuration = {
+// Basic configuration object for our FlexBalancer application
+const configuration = {
+    // List of providers we are interested in
+    // `name` must be one of the valid provider aliases from TCDNProvider type
     providers: [
         {
-            name: 'jsdelivr-cdn',
+            name: 'jsdelivr-cdn' as TCDNProvider,
             cname: 'www.foo.com',
             padding: 0,
-            ttl: 20,
+            ttl: 20, // We can provide different TTL for different providers
         },
         {
-            name: 'akamai',
+            name: 'akamai' as TCDNProvider,
             cname: 'www.bar.com',
             padding: 10
         },
         {
-            name: 'cloudflare',
+            name: 'cloudflare' as TCDNProvider,
             cname: 'www.baz.com',
             padding: 0
         }
     ],
-    // Selected if a provider can't be determined
+
+    // Default provider which will be chosen if no suitable providers will be found.
     default_provider: 'jsdelivr-cdn',
 
-    // The TTL to be set when the application chooses a geo provider.
+    // The TTL to be set when the application chooses a provider.
     default_ttl: 30,
 
-    // The TTL to be set when the application chooses the default provider.
+    // Minimum threshold under which provider will be considered unavailable
     availability_threshold: 97,
 };
 
 async function onRequest(req: IRequest, res: IResponse) {
-    // Get availability
+    // Get availability for each provider
     const providersAvailability = configuration.providers.map((provider) => {
         return { provider, availability: fetchCdnRumUptime(provider.name) }
     });
@@ -48,13 +40,16 @@ async function onRequest(req: IRequest, res: IResponse) {
     // Filter by availability threshold
     const availableProviders = providersAvailability.filter(data => data.availability > configuration.availability_threshold);
 
-    // Get performance data with paddings for available
+    // Get performance and apply paddings for available providers
     const providersPerformance = availableProviders.map(data => ({
         provider: data.provider,
         performance: fetchCdnRumPerformance(data.provider.name) + data.provider.padding
     }));
 
+    // Start decision process
     let decision: any = null;
+
+    // If we have a providers to choose from - choose one with the best performance
     if (providersPerformance.length) {
         decision = providersPerformance.sort((a, b) => a.performance - b.performance)[0].provider;
     }
