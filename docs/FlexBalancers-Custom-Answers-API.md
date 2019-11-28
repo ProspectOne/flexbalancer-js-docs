@@ -1,6 +1,5 @@
 # FlexBalancer Custom Answers API
 
-
 ## Application 
 
 The typical format for Custom Answer is:
@@ -177,20 +176,15 @@ User monitors ids. Type is generated based on list of your monitors IDs. If you 
 declare type TMonitor = ;
 ```
 
-**TIpRange**
-
-Has two `string` properties - start and end IPs.
-
+For example, can be
 ```typescript
-declare type TIpRange = {
-    startIp: TIp;
-    endIp: TIp;
-}
+declare type TMonitor = 307 | 308;
 ```
+If user created monitors that got ids 307 and 308.
 
 **TSubnetMask**
 
-Implement if you need to use subnet parameters.
+Implement if you need to use subnet parameter.
 
 ```typescript
 declare type TSubnetMask = string;
@@ -344,50 +338,135 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-**lookupCity(ip: string, target: number, threshold: number): ICityResponse**
+**lookupCity(ip: string):Promise<ICityResponse | null>**
 
-Finds the city IP belongs to. Can be used with the first parameter only. Returns result that implements  `IStateResponse`. *Why it isnt' Promise?*
+Finds the city IP belongs to. Resolves result that implements  `ICityResponse` or `null` if IP does not belong to any city.
 
-* **ip** - *(TIp)* - IP to find result for.
-* **target** - *(number)* - ?
+* **ip** - *(string)* - IP to find result for.
+
+```typescript
+// ToDo example
+```
+
+Can be overloaded and used with additional parameters:
+
+**lookupCity(ip: string, target: number, threshold: number):Promise<boolean>**
+
+Finds if IP belongs to particular city. Resolves `boolean`.
+
+* **ip** - *(string)* - IP to find result for.
+* **target** - *(number)* - City id (?) Maybe geoname?.
 * **threshold** - *(number)* - distance threshold.
 
-**lookupState(ip: string, target: TState, threshold: number): Promise<IStateResponse | null>**
+```typescript
+// ToDo example
+```
 
-Finds the US state IP belongs to. Can be used with the first parameter only. If Promise is fulfilled - returns result that implements  `IStateResponse`.
+**lookupState(ip: string):Promise<IStateResponse | null>**
 
-* **ip** - *(TIp)* - IP to find result for.
-* **target** - *(TState)* - The US State ISO code.
-* **threshold** - *(number)* - distance threshold.
+Finds the US state IP belongs to. Resolves result that implements  `IStateResponse` or `null` if IP does not belong to the US.
 
-**lookupCountry(ip: string, target: TCountry, threshold: number):Promise<ICountryResponse>**
+* **ip** - *(string)* - IP to find result for.
 
-Finds the country IP belongs to. Can be used with the first parameter only. If Promise is fulfilled - returns result that implements  `ICountryResponse`.
+```typescript
+// ToDo example
+```
 
-* **ip** - *(TIp)* - IP to find result for.
+Can be overloaded and used with additional parameters:
+
+**lookupState(ip: string, target: TCountry, threshold: number):Promise<boolean>**
+
+Finds if IP belongs to particular country. Resolves `boolean`.
+
+* **ip** - *(string)* - IP to find result for.
 * **target** - *(TCountry)* - Country ISO code.
 * **threshold** - *(number)* - distance threshold.
 
-**lookupContinent(ip: string, target?: TContinent, threshold?: number): Promise<IContinentResponse>**
+```typescript
+// ToDo example
+```
 
-Finds the continent IP belongs to. Can be used with the first parameter only. If Promise is fulfilled - returns result that implements  `IContinentResponse`. 
+**lookupCountry(ip: string):Promise<ICountryResponse>**
 
-* **ip** - *(TIp)* - IP to find result for.
+Finds the country IP belongs to. Resolves result that implements  `ICountryResponse`.
+
+* **ip** - *(string)* - IP to find result for.
+
+```typescript
+// ToDo example
+```
+
+Can be overloaded and used with additional parameters:
+
+**lookupCountry(ip: string, target: TCountry, threshold: number):Promise<boolean>**
+
+Finds if IP belongs to particular country. Resolves `boolean`.
+
+* **ip** - *(string)* - IP to find result for.
+* **target** - *(TCountry)* - Country ISO code.
+* **threshold** - *(number)* - distance threshold.
+
+```typescript
+// ToDo example
+```
+
+**lookupContinent(ip: string): Promise<IContinentResponse>**
+
+Finds the continent IP belongs to. Resolves result that implements  `IContinentResponse`.
+
+* **ip** - *(string)* - IP to find result for.
+
+```typescript
+// ToDo example
+```
+
+Can be overloaded and used with additional parameters:
+
+**lookupContinent(ip: string, target: TContinent, threshold: number): Promise<boolean>**
+
+Finds if IP belongs to particular continent. If Promise is fulfilled - resolves `boolean`. 
+
+* **ip** - *(string)* - IP to find result for.
 * **target** - *(TContinent)* - Continent ISO code.
 * **threshold** - *(number)* - distance threshold.
 
+```typescript
+// ToDo example
+```
+
 **lookupAsn(ip: string): IAsnResponse**
 
-Returns ASN for IP provided. The result implements interface 
+Returns ASN for IP provided. The result implements `IAsnResponse` interface. 
 
-* **ip** - *(TIp)* - IP to find ASN for.
+* **ip** - *(string)* - IP to find ASN for.
 
-**isIpInRange(ip: TIp, range: TIpRange): boolean**
+```typescript
+async function onRequest(req: IRequest, res: IResponse) {
+    if(lookupAsn(req.ip) == 'AS15169') {
+        ...​
+        return res;
+    }
+...
+}
+```
+
+**isIpInRange(ip: TIp, startIp: TIp, endIp: TIp): boolean**
 
 Checks if IP belongs to range provided. Returns boolean.
 
 * **ip** - *(TIp)* - Ip to check, `needle`.
-* **range** - *(TIpRange)* - `haystack`.
+* **startIp** - *(TIp)* - `haystack` start.
+* **endIp** - *(TIp)* - `haystack` end.
+
+```typescript
+async function onRequest(req: IRequest, res: IResponse) {
+    if(isIpInRange(req.ip, "192.168.0.1", "192.168.0.250")) {
+        ...​
+        return res;
+    }
+...
+}
+```
 
 **isIpInMask(ip: TIp, ipMask: TSubnetMask): boolean**
 
@@ -395,3 +474,15 @@ Checks if IP belongs to net mask provided. Returns boolean.
 
 * **ip** - *(TIp)* - Ip to check, `needle`.
 * **ipMask** - *(TSubnetMask)* - `haystack`.
+
+```typescript
+async function onRequest(req: IRequest, res: IResponse) {
+    if(isIpInMask(req.ip, "145.2.3.4/16")) {
+        res.addr = ['mask16.com'];
+        res.ttl = 30;
+        ...​
+        return res;
+    }
+...
+}
+```
