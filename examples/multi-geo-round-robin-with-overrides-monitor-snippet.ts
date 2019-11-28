@@ -1,3 +1,4 @@
+// Geographic Round Robin with Sonar Availability
 const configuration = {
     providers: [
         {
@@ -11,12 +12,8 @@ const configuration = {
             monitor: (305 as TMonitor)
         },
         {
-            name: 'third',
+            name: 'baz',
             cname: 'www.baz.com'
-        },
-        {
-            name: 'origin',
-            cname: 'www.origin.com'
         }
     ],
     countriesAnswersRoundRobin: {
@@ -51,7 +48,7 @@ async function onRequest(req: IRequest, res: IResponse) {
     const {countriesAnswersRoundRobin, providers, defaultTtl, requireMonitorData} = configuration;
 
     // Country where request was made from
-    let requestCountry = req.location.country;
+    let requestCountry = req.location.country as TCountry;
 
     // Checking did we managed to detect country, does our country listed in countriesAnswersRoundRobin list
     if (requestCountry && countriesAnswersRoundRobin[requestCountry]) {
@@ -81,7 +78,7 @@ async function onRequest(req: IRequest, res: IResponse) {
     }
     // Fallback pick 'origin' cname
     return {
-        addr: providers.find(provider => provider.name === 'origin').cname,
+        addr: 'www.origin.com',
         ttl: defaultTtl
     };
 }
