@@ -1,4 +1,4 @@
-//Configuration params with list of answers
+// Main configuration object
 const configuration = {
     /** List of  providers configuration */
     providers: [
