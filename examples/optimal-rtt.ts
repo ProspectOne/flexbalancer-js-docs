@@ -49,29 +49,22 @@ const configuration = {
     errorTtl: 20
 };
 /**
- *
- * @param items
- * @param property
- * @param name
+ * Pick single item with property equal to value
  */
-const findByProperty = <T>(items: T[], property, name) => items.find(item => item[property] == name );
+const findByProperty = <T>(items: T[], property, value) => items.find(item => item[property] == value );
 
 /**
- * returns index of Lowest value in array
- * @param array
+ * Pick index of lowest number in array of numbers
  */
 const getLowest = (array: number[]): number => array.indexOf(Math.min(...array));
 
 /**
- * returns object which have lowest value in property
- * @param array
- * @param property
+ * Pick item with lowest value in property from array of items
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
 /**
- * Return response if proper candidate found for Country or Continent rule
- * @param location
+ * Return response if proper candidate found for Country or Continent rule else returns null
  */
 const getGeoResponse = (location):IResponse | null => {
     let candidate;
