@@ -32,14 +32,11 @@ const configuration = {
 };
 
 /**
- * returns index of Lowest value in array
- * @param array
+ * Returns index of lowest number in array
  */
 const getLowest = (array: number[]): number => array.indexOf(Math.min(...array));
 /**
- * returns object which have lowest value in property
- * @param array
- * @param property
+ * Pick item with lowest value in property
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
