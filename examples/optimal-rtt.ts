@@ -1,38 +1,34 @@
 //Configuration params with list of answers
 const configuration = {
+    /** List of  providers configuration */
     providers: [
         {
-            name: ('belugacdn' as TCDNProvider),
-            cname: 'www.foo.com',
-            padding: 0,
-            cdnPerformance: 0,
+            name: ('belugacdn' as TCDNProvider), // CDN Provider alias to work with
+            cname: 'www.foo.com', // cname to pick as a result
+            padding: 0, //  additional bonus or penalty
             countries: (['UA'] as TCountry[])
         },
         {
             name: ('ovh-cdn' as TCDNProvider),
             cname: 'www.bar.com',
             padding: 0,
-            cdnPerformance: 0,
             continents: (['NA', 'EU'] as TContinent[])
         },
         {
             name: ('cloudflare' as TCDNProvider),
             cname: 'www.baz.com',
             padding: 0,
-            cdnPerformance: 0,
             asns: [123, 321]
         },
         {
             name: ('fastly'  as TCDNProvider),
             cname: 'www.qux.com',
             padding: 0,
-            cdnPerformance: 0,
             except_countries: (['CN'] as TCountry[])
         }
     ],
     // The minimum availability score that providers must have in order to be considered available
     availabilityThreshold: 90,
-
     // Set to `true` to enable the geo override feature
     geoOverride: false,
     // A mapping of continent codes to CDN provider name { 'AF': 'belugacdn', 'AS': 'ovh-cdn' }
@@ -155,15 +151,16 @@ async function onRequest(request: IRequest, response: IResponse) {
     //If we found proper candidates for answer, we store its CDN rum performance
     // and apply additional bonus or penalty and return lowest one
     if (candidates.length) {
-        candidates.forEach((element, index) => {
-            let cdnPerformance = (location.country ?
-                fetchCdnRumPerformance(element.name, 'country', location.country) :
-                fetchCdnRumPerformance(element.name));
-            candidates[index].cdnPerformance = cdnPerformance * (1 + element.padding / 100);
-        });
-
+        const performanceMapData = candidates.map(
+            (provider) => ({
+                provider,
+                cdnPerformance: (location.country ?
+                    fetchCdnRumPerformance(provider.name, 'country', location.country) :
+                    fetchCdnRumPerformance(provider.name)) * (1 + provider.padding / 100)
+            })
+        );
         return  {
-            addr: getLowestByProperty(candidates, 'cdnPerformance').cname,
+            addr: getLowestByProperty(performanceMapData, 'cdnPerformance').provider.cname,
             ttl: defaultTtl
         };
     }
