@@ -25,8 +25,7 @@ const configuration = {
 };
 
 /**
- * Function return random object element from array
- * @param items
+ * Pick random item from array of items
  */
 const getRandomElement = <T>(items: T[]): T => {
     return items[Math.floor(Math.random() * items.length)];
@@ -34,8 +33,6 @@ const getRandomElement = <T>(items: T[]): T => {
 
 /**
  * If monitor is set for candidate returns its availability, else returns true if monitor is not required
- * @param candidate
- * @param requireMonitorData
  */
 const isProperCandidate = (candidate, requireMonitorData) => {
     if (candidate.monitor) {
