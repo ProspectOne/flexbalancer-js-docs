@@ -23,25 +23,19 @@ const configuration = {
     availabilityThreshold: 90 // Board value for providers to compare with
 };
 /**
- * returns index of Highest value in array
- * @param array
+ * Returns index of highest number in array
  */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
 /**
- * returns object which have highest value of property
- * @param array
- * @param property
+ * Pick item which highest value in property
  */
 const getHighestByProperty = <T>(array: T[], property):T => array[getHighest(array.map(item => item[property]))];
 /**
- * returns index of Lowest value in array
- * @param array
+ * Returns index of lowest number in array
  */
 const getLowest = (array: number[]): number => array.indexOf(Math.min(...array));
 /**
- * returns object which have lowest value in property
- * @param array
- * @param property
+ * Pick item which lowest value in property
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
