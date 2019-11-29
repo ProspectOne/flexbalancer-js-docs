@@ -24,20 +24,15 @@ const configuration = {
 };
 
 /**
- * returns index of Highest value in array
- * @param array
+ * Pick highest value in array of numbers
  */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
 /**
- * returns object which have highest value of property
- * @param array
- * @param property
+ * Pick object item with highest value of property from array of items
  */
 const getHighestByProperty = <T>(array: T[], property):T => array[getHighest(array.map(item => item[property]))];
 /**
- * return Sum of property value for each object in array
- * @param items
- * @param property
+ * Calculates Sum of property value for each object in array
  */
 const getSumByProperty = <T>(items:T[], property): number => items.reduce((sum, item) => sum += item[property],0);
 
