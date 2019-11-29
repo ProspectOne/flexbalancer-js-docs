@@ -1,8 +1,10 @@
+// Main configuration
 const configuration = {
+    /** List of providers configuration */
     providers: [
         {
-            name: ('custom_defined_measured_cdn' as TCDNProvider),
-            cname: 'www.custom-cdn.com',
+            name: ('custom_defined_measured_cdn' as TCDNProvider),// CDN Provider alias to work with
+            cname: 'www.custom-cdn.com',// cname to pick as a result
             preferredMarkets: {
                 'EU': 1.00,
                 'NA': 1.00,
@@ -55,16 +57,16 @@ const configuration = {
         'trp': 0.5 // trp (Throughput) Use for large (> 100kb) files
     },
     defaultProfile: 'rtt',
-    defaultTtl: 300
+    defaultTtl: 300, // The DNS TTL to be applied to DNS responses in seconds.
+    availabilityThreshold: 80 // Board value for providers 'Uptime' to compare with
 };
 
 function rankPlatforms(cdnPerformanceData) {
-
     // Get array of all providers and rtt in milliseconds
     // for each one.
     const maxPoints = 1000;
     const min = Math.min(...cdnPerformanceData.map((item) => item.perf));
-    const { providers, profiles, defaultProfile } = configuration;
+    const {  profiles, defaultProfile } = configuration;
 
     // Score is not based on the range, so I don't expect scores of 0 (which makes the weights in the next step more effective)
     // For RTT
@@ -85,7 +87,7 @@ function calculateTotalScore(
 ): number[] {
     return cdnPerformanceData.map((provider, index) => {
         let totalScore = scores[index];
-        
+
         // apply pricing penalties / boosts for (non) EU/NA traffic
         if (continent && provider.provider.preferredMarkets[continent]) {
             totalScore *= provider.provider.preferredMarkets[continent];
@@ -95,31 +97,38 @@ function calculateTotalScore(
     });
 }
 
+/**
+ * returns index of Highest value in array
+ * @param array
+ */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
-
-const getRandomProvider = () => {
-    const { providers } = configuration;
-    return providers[Math.floor(Math.random() * providers.length)];
-};
+/**
+ * Returns random element of array
+ * @param items
+ */
+const getRandom = <T>(items:T[]):T =>  items[Math.floor(Math.random() * items.length)];
 
 async function onRequest(request: IRequest, response: IResponse): Promise<IResponse> {
-    const { providers, defaultTtl } = configuration;
+    const { providers, defaultTtl, availabilityThreshold } = configuration;
     const { continent } = request.location;
 
+    // Filter providers by uptime more the
     const availableProviders = providers.filter(
         (provider) =>
             (continent &&
                 fetchCdnRumUptime(provider.name, 'continent', continent) ||
-                fetchCdnRumUptime(provider.name)) > 80 // uptime data for 10 minutes
+                fetchCdnRumUptime(provider.name)) > availabilityThreshold // uptime data for 10 minutes
     );
 
-    if (!availableProviders.length) { //availableProviders
+    // Return random provider from available.
+    if (!availableProviders.length) { // availableProviders
         return {
-            addr: getRandomProvider().cname,
+            addr: getRandom(providers).cname,
             ttl: defaultTtl
         };
     }
 
+    // Else create array with performance data for each provider
     const cdnPerformanceData = availableProviders.map(
         (provider) => ({
             provider,
@@ -130,12 +139,14 @@ async function onRequest(request: IRequest, response: IResponse): Promise<IRespo
         })
     );
 
+    // Calculate total score by
     const totalScores = calculateTotalScore(
         cdnPerformanceData,
         rankPlatforms(cdnPerformanceData),
         request.location.continent
     );
 
+    // Return as default, provider with highest score
     return {
         addr: cdnPerformanceData[getHighest(totalScores)].provider.cname,
         ttl: defaultTtl
