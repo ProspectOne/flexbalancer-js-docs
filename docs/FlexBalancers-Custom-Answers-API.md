@@ -39,7 +39,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Interfaces implemented by `req` and `res` are listed below: 
+Interfaces implemented by `req` and `res` : 
 
 ### Interfaces
 
@@ -89,7 +89,7 @@ Types that are used at that interfaces are listed at section below.
 
 ## Provided functions
 
-We have prepared list of helpful functions that can be used inside your application. We will list types and functions with interfaces below.
+We have prepared list of helpful types and functions that can be used inside your application.
 
 ### Types
 
@@ -345,7 +345,7 @@ Function also accepts additional parameters `target` and `threshold`:
 *async* **lookupCity(ip: string, target: number, threshold: number):Promise<boolean>**
 
 * **ip** - *(string)* - IP to find result for.
-* **target** - *(number)* - City id (?) Maybe geoname?.
+* **target** - *(number)* - targeted city geoname id. Can be found at [MaxMind GeoLite2 Databases](https://dev.maxmind.com/geoip/geoip2/geolite2/)
 * **threshold** - *(number)* - distance threshold.
 
 Finds if IP belongs to particular city. Resolves `boolean`.
