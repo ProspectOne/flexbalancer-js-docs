@@ -31,33 +31,34 @@ const configuration = {
         }
     ],
     // The minimum availability score that providers must have in order to be considered available
-    availability_threshold: 90,
+    availabilityThreshold: 90,
 
     // Set to `true` to enable the geo override feature
-    geo_override: false,
+    geoOverride: false,
     // A mapping of continent codes to CDN provider name { 'AF': 'belugacdn', 'AS': 'ovh-cdn' }
-    continent_to_provider: {},
+    continentToProvider: {},
     // A mapping of ISO 3166-1 country codes to CND provider name { 'DZ': 'belugacdn', 'AO': 'ovh-cdn' }
-    country_to_provider: {},
+    countryToProvider: {},
     // Set to `true` to enable the geo default feature
-    geo_default: false,
-
+    geoDefault: false,
     // Set to `true` to enable the asn override feature
-    asn_override: false,
-    // A mapping of ASN codes to provider aliases:  asn_to_provider: { 123: 'belugacdn', 124: 'ovh-cdn' }
-    asn_to_provider: {},
-
+    asnOverride: false,
+    // A mapping of ASN codes to provider aliases:  asnToProvider: { 123: 'belugacdn', 124: 'ovh-cdn' }
+    asnToProvider: {},
     // Selected if an optimal provider can't be determined
-    default_provider: ('fastly' as TCDNProvider),
+    defaultProvider: ('fastly' as TCDNProvider),
     // The TTL to be set when the application chooses an optimal provider, including geo override.
-    default_ttl: 20,
+    defaultTtl: 20,
     // The TTL to be set when the application chooses a potentially non-optimal provider, e.g. default or geo default.
-    error_ttl: 20
+    errorTtl: 20
 };
-
-const findProviderByName = (name: TCDNProvider) => {
-    return configuration.providers.find( item => item.name == name );
-};
+/**
+ *
+ * @param items
+ * @param property
+ * @param name
+ */
+const findByProperty = <T>(items: T[], property, name) => items.find(item => item[property] == name );
 
 /**
  * returns index of Lowest value in array
@@ -73,55 +74,56 @@ const getLowest = (array: number[]): number => array.indexOf(Math.min(...array))
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
 /**
- * set answer as response for provided override rule and return status of this operation
- * @param override
- * @param subject
- * @param response
+ * Return response if proper candidate found for Country or Continent rule
+ * @param location
+ * @param res
  */
-const setOverrideResponse = (override: object, subject: any, response: IResponse): boolean => {
-    if (override[subject]) {
-        let candidate = findProviderByName(override[subject]);
-        if (candidate) {
-            response.addr = candidate.cname;
-            response.ttl = response.ttl || configuration.default_ttl;
-            return true;
-        } else {
-            response.ttl = response.ttl || configuration.error_ttl;
-            return  false;
-        }
+const getGeoResponse = (location, res: IResponse):IResponse | null => {
+    let candidate;
+    const {providers, countryToProvider, continentToProvider, defaultTtl, errorTtl} = configuration;
+
+    candidate = findByProperty(providers, 'name', countryToProvider[location.country]);
+    if (candidate) {
+        return {
+            addr: candidate.cname,
+            ttl: res.ttl || defaultTtl
+        };
     }
-    return  false;
+
+    //if override for country not found we will try to look for continent override
+    candidate = findByProperty(providers, 'name', continentToProvider[location.continent]);
+    if (candidate) {
+        return {
+            addr: candidate.cname,
+            ttl: res.ttl || defaultTtl
+        };
+    }
+    return null;
 };
 
 async function onRequest(request: IRequest, response: IResponse) {
-    let location = request.location;
+    let location = request.location, candidate, res;
+    const {providers, geoDefault, geoOverride, asnOverride, asnToProvider, availabilityThreshold, defaultTtl, defaultProvider, errorTtl} = configuration;
 
-    //Check if geo_override is enabled and return response of override if it matches its rules
-    if (configuration.geo_override) {
-        if (setOverrideResponse(
-            configuration.country_to_provider,
-            location.country,
-            response)) return response;
-
-        //if override for country not found we will try to look for continent override
-        if (setOverrideResponse(
-            configuration.continent_to_provider,
-            location.continent,
-            response
-        )) return response;
+    //Check if geoOverride is enabled and return response of override if it matches its rules
+    if (geoOverride) {
+        res = getGeoResponse(location, response);
+        if (res) return res;
     }
 
     //Check if asn_override is enabled and return response of override if it matches its rules
-    if (configuration.asn_override) {
-        if (setOverrideResponse(
-            configuration.asn_to_provider,
-            location.subnet.asn,
-            response
-        )) return response;
+    if (asnOverride && location.subnet.asn) {
+        candidate = findByProperty(providers, 'name', asnToProvider[location.subnet.asn]);
+        if (candidate) {
+            return {
+                addr: candidate.cname,
+                ttl: response.ttl || defaultTtl
+            };
+        }
     }
 
     //If no overrides enabled or none of they'rs rules passed we will check answers with they'r strict rules
-    let candidates = configuration.providers.filter((item) => {
+    let candidates = providers.filter((item) => {
         if (item.except_countries &&
             location.country &&
             item.except_countries.indexOf(location.country) !== -1) {
@@ -146,13 +148,9 @@ async function onRequest(request: IRequest, response: IResponse) {
             return false;
         }
 
-        if ((location.country &&
-            fetchCdnRumUptime(item.name, 'country', location.country)
-            || fetchCdnRumUptime(item.name)) < configuration.availability_threshold) {
-            return false;
-        }
-
-        return true;
+        return (location.country &&
+            fetchCdnRumUptime(item.name, 'country', location.country) ||
+            fetchCdnRumUptime(item.name)) >= availabilityThreshold;
     });
 
     //If we found proper candidates for answer, we store its CDN rum performance
@@ -165,35 +163,28 @@ async function onRequest(request: IRequest, response: IResponse) {
             candidates[index].cdnPerformance = cdnPerformance * (1 + element.padding / 100);
         });
 
-        let resultCandidate = getLowestByProperty(candidates, 'cdnPerformance');
-
-        response.addr = resultCandidate.cname;
-        response.ttl = response.ttl | configuration.default_ttl;
-
-        return  response;
+        return  {
+            addr: getLowestByProperty(candidates, 'cdnPerformance').cname,
+            ttl: response.ttl | defaultTtl
+        };
     }
 
-    //Even if geo_override disabled but we didnt found proper answer till that time, if geo_default is enabled
-    //we will try to find answer with geo_overrides
-    if (configuration.geo_default) {
-        if (setOverrideResponse(
-            configuration.country_to_provider,
-            location.country,
-            response)) return response;
-
-        if (setOverrideResponse(
-            configuration.continent_to_provider,
-            location.continent,
-            response
-        )) return response;
+    //Even if geoOverride disabled but we didnt found proper answer till that time, if geoDefault is enabled
+    //we will try to find answer with geoOverrides
+    if (geoDefault) {
+        res = getGeoResponse(location, response);
+        if (res) return res;
     }
 
     //return default
-    let defaultResponse = findProviderByName(configuration.default_provider);
-    if (defaultResponse){
-        response.addr = defaultResponse.cname;
-        response.ttl = response.ttl | configuration.default_ttl;
+    candidate = findByProperty(providers, 'name', defaultProvider);
+    if (candidate){
+        return {
+            addr: candidate,
+            ttl: response.ttl | defaultTtl
+        };
     }
-
-    return  response;
+    // Default Candidate also not found. Looks like configuration error
+    response.ttl = errorTtl;
+    return  response
 }
