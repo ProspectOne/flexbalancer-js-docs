@@ -76,17 +76,16 @@ const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array
 /**
  * Return response if proper candidate found for Country or Continent rule
  * @param location
- * @param res
  */
-const getGeoResponse = (location, res: IResponse):IResponse | null => {
+const getGeoResponse = (location):IResponse | null => {
     let candidate;
-    const {providers, countryToProvider, continentToProvider, defaultTtl, errorTtl} = configuration;
+    const {providers, countryToProvider, continentToProvider, defaultTtl} = configuration;
 
     candidate = findByProperty(providers, 'name', countryToProvider[location.country]);
     if (candidate) {
         return {
             addr: candidate.cname,
-            ttl: res.ttl || defaultTtl
+            ttl: defaultTtl
         };
     }
 
@@ -95,7 +94,7 @@ const getGeoResponse = (location, res: IResponse):IResponse | null => {
     if (candidate) {
         return {
             addr: candidate.cname,
-            ttl: res.ttl || defaultTtl
+            ttl: defaultTtl
         };
     }
     return null;
@@ -107,7 +106,7 @@ async function onRequest(request: IRequest, response: IResponse) {
 
     //Check if geoOverride is enabled and return response of override if it matches its rules
     if (geoOverride) {
-        res = getGeoResponse(location, response);
+        res = getGeoResponse(location);
         if (res) return res;
     }
 
@@ -117,7 +116,7 @@ async function onRequest(request: IRequest, response: IResponse) {
         if (candidate) {
             return {
                 addr: candidate.cname,
-                ttl: response.ttl || defaultTtl
+                ttl: defaultTtl
             };
         }
     }
@@ -165,14 +164,14 @@ async function onRequest(request: IRequest, response: IResponse) {
 
         return  {
             addr: getLowestByProperty(candidates, 'cdnPerformance').cname,
-            ttl: response.ttl | defaultTtl
+            ttl: defaultTtl
         };
     }
 
     //Even if geoOverride disabled but we didnt found proper answer till that time, if geoDefault is enabled
     //we will try to find answer with geoOverrides
     if (geoDefault) {
-        res = getGeoResponse(location, response);
+        res = getGeoResponse(location);
         if (res) return res;
     }
 
@@ -181,7 +180,7 @@ async function onRequest(request: IRequest, response: IResponse) {
     if (candidate){
         return {
             addr: candidate,
-            ttl: response.ttl | defaultTtl
+            ttl: defaultTtl
         };
     }
     // Default Candidate also not found. Looks like configuration error
