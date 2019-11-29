@@ -61,6 +61,9 @@ const configuration = {
     availabilityThreshold: 80 // Board value for providers 'Uptime' to compare with
 };
 
+/**
+ * Generates rank by performance data
+ */
 function rankPlatforms(cdnPerformanceData) {
     // Get array of all providers and rtt in milliseconds
     // for each one.
@@ -80,6 +83,9 @@ function rankPlatforms(cdnPerformanceData) {
     });
 }
 
+/**
+ * Calculate Total Score from given score and data
+ */
 function calculateTotalScore(
     cdnPerformanceData,
     scores: number[],
@@ -98,13 +104,11 @@ function calculateTotalScore(
 }
 
 /**
- * returns index of Highest value in array
- * @param array
+ * Pick highest value from given array of numbers
  */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
 /**
- * Returns random element of array
- * @param items
+ * Pick random element from given array of type
  */
 const getRandom = <T>(items:T[]):T =>  items[Math.floor(Math.random() * items.length)];
 
