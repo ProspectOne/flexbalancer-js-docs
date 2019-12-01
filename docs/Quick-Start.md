@@ -1,12 +1,15 @@
 # Create and manage Custom FlexBalancer Answer
+1. [Create FlexBalancer with Custom Answer](#create-flexbalancer-with-custom-answer)
+2. [Edit FlexBalancer with Custom Answer](#edit-flexbalancer-with-custom-answer)
+3. [Delete FlexBalancer](#delete-flexbalancer)
 
-## Create FlexBalancer with custom answer 
+## Create FlexBalancer with custom answer
 
 First of all, log in and proceed to `FlexBalancers` page:
 
 ![Alt text](img/create_page_1.png?raw=true "Create Step 1")
 
-Select name for your Balancer, `Custom code` button and press `Next step`:
+Select name for your Balancer, `Custom code` button and press `Next Step`:
 
 ![Alt text](img/create_page_2.png?raw=true "Create Step 2")
 

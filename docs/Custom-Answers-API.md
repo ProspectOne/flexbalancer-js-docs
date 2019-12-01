@@ -1,4 +1,21 @@
 # FlexBalancer Custom Answers API
+1. [Application](#application)
+    * [Main function (onRequest)](#main-function)
+    * [Interfaces](#interfaces)
+2. [Provided functions](#provided-functions)
+    * [Types](#types)
+    * [Functions](#functions)
+        * [fetchMonitorUptime](#fetchmonitoruptime)
+        * [isMonitorOnline](#ismonitoronline)
+        * [fetchCdnRumUptime](#fetchcdnrumuptime)
+        * [fetchCdnRumPerformance](#fetchcdnrumperformance)
+        * [lookupCity](#lookupcity)
+        * [lookupState](#lookupstate)
+        * [lookupCountry](#lookupcountry)
+        * [lookupContinent](#lookupContinent)
+        * [lookupAsn](#lookupasn)
+        * [isIpInRange](#isipinrange)
+        * [isIpInMask](#isipinmask)
 
 ## Application 
 
@@ -15,9 +32,9 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 As you can see, we have chosen [TypeScript](https://www.typescriptlang.org/) as a programming language for Custom Answers. It has a lot of advantages and in most cases does not cause any problems for people who used JavaScript before.  
 
-### Functions
+### Main Function
 
-*async* **onRequest(request: IRequest, response: IResponse): Promise<IResponse>**
+*async* **onRequest(request: IRequest, response: IResponse): Promise\<IResponse>**
 
 * **request** - *(IRequest)* - User request data passed to answer by flexbalancer.
 * **response** - *(IResponse)* - Answer response, that is modified by custom answer logic.
@@ -27,7 +44,7 @@ For example, you want to set particular answer for users from `France`.
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    if(req.location.country == 'FR') {
+    if(req.location.country && req.location.country == 'FR') {
         res.addr = 'answer.mysite.fr';
         res.ttl = 25;
 
@@ -48,27 +65,32 @@ Interfaces implemented by `req` and `res` :
 ```typescript
 declare interface IRequest {
     /**
-     * User ip address
-     **/
+    * User ip address
+    **/
     readonly ip: TIp;
 
     /**
-     * Ip or Hostname of dns which
-     * were requested resolve.
-     **/
+    * Ip or Hostname of dns which
+    * were requested resolve.
+    **/
     readonly dnsAddress: TIp | string;
 
     readonly location: {
-        city: number;
-        country: TCountry;
-        state: TState | null;
-        continent: TContinent;
-        latitude: number;
-        longitude: number;
+        subnet: {
+            minAddress: number;
+            maxAddress: number;
+            asn?: number;
+        };
+        city?: number;
+        country?: TCountry;
+        state?: TState | null;
+        continent?: TContinent;
+        latitude?: number;
+        longitude?: number;
     };
 }
 ```
-
+***
 **IResponse**
 
 ```typescript
@@ -77,7 +99,7 @@ declare interface IResponse {
      * List should contains only hostnames
      * or only IPs but not mixed.
      */
-    addr: TIp[] | string[];
+    addr: string | string[];
 
     /**
      * Time to live in seconds
@@ -99,7 +121,7 @@ Type for IP-address.
 ```typescript
 declare type TIp = string;
 ```
-
+***
 **TCountry**
 
 Enumeration contains countries ISO-codes.
@@ -107,14 +129,14 @@ Enumeration contains countries ISO-codes.
 declare type TCountry = 'DZ' | 'AO' | 'BJ' | 'BW' | 'BF' ...  'PR' | 'GU';
 ```
 See [ISO codes on Wikipedia](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements) for the full list.
-
+***
 **TContinent**
 
 ISO codes for continents enumeration.
 ```typescript
 declare type TContinent = 'AF' | 'AS' | 'EU' | 'NA' | 'OC' | 'SA';
 ```
-
+***
 **TState**
 
 ISO codes for the US states.
@@ -122,7 +144,7 @@ ISO codes for the US states.
 declare type TState = 'AL' | 'AK' | 'AZ' | 'AR' | 'CA' ...  'WI' | 'WY';
 ```
 See [US-states ISO codes on Wikipedia](https://en.wikipedia.org/wiki/ISO_3166-2:US#Current_codes) for the full list.
-
+***
 **TCDNProvider**
 
 Type represent list of CDN providers aliases.
@@ -153,13 +175,12 @@ Aliases for CDN Providers:
 | jsdelivr-cdn | jsDelivr CDN |
 | stackpath-cdn | StackPath CDN |
 | cdnnet | CDN.NET |
-| quantil | Quantil CDN |
-| azion | Azion |
+| cdnetworks| CDNetworks |
 | verizon-edgecast-cdn | Verizon (Edgecast) CDN |
 | azure-cdn | Azure CDN |
 | cachefly | CacheFly |
 | medianova | Medianova |
-
+***
 **TMonitor**
 
 User monitors ids. Type is generated based on list of your monitors IDs. If you don't have any - it is empty.
@@ -178,7 +199,7 @@ For example, can be
 declare type TMonitor = 307 | 308;
 ```
 If user created monitors that got ids 307 and 308.
-
+***
 **TSubnetMask**
 
 Implement if you need to use subnet parameter.
@@ -186,7 +207,7 @@ Implement if you need to use subnet parameter.
 ```typescript
 declare type TSubnetMask = string;
 ```
-
+***
 **TRUMLocationSelectorState**
 **TRUMLocationSelectorCountry**
 **TRUMLocationSelectorContinent**
@@ -201,7 +222,7 @@ declare type TRUMLocationSelectorContinent = 'continent';
 
 ### Functions
 
-**fetchMonitorUptime(monitor: TMonitor): number**
+**fetchMonitorUptime(monitor: TMonitor): number** <a name="fetchmonitoruptime"></a>
 
 * **monitor** - *(TMonitor)* - User Monitor ID.
 
@@ -218,8 +239,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-**isMonitorOnline(monitor: TMonitor): boolean**
+***
+**isMonitorOnline(monitor: TMonitor): boolean** <a name="ismonitoronline"></a>
 
 * **monitor** - *(TMonitor)* - User Monitor ID.
 
@@ -236,8 +257,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-**fetchCdnRumUptime(provider: TCDNProvider): number**
+***
+**fetchCdnRumUptime(provider: TCDNProvider): number** <a name="fetchcdnrumuptime"></a>
 
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 
@@ -274,8 +295,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-**fetchCdnRumPerformance(provider: TCDNProvider): number**
+***
+**fetchCdnRumPerformance(provider: TCDNProvider): number** <a name="fetchcdnrumperformance"></a>
 
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 
@@ -312,8 +333,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-*async* **lookupCity(ip: string):Promise<ICityResponse | null>**
+***
+*async* **lookupCity(ip: string):Promise<ICityResponse | null>** <a name="lookupcity"></a>
 
 * **ip** - *(string)* - IP to find result for.
 
@@ -342,7 +363,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 Function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupCity(ip: string, target: number, threshold: number):Promise<boolean>**
+*async* **lookupCity(ip: string, target: number, threshold: number):Promise\<boolean>**
 
 * **ip** - *(string)* - IP to find result for.
 * **target** - *(number)* - targeted city geoname id. Can be found at [MaxMind GeoLite2 Databases](https://dev.maxmind.com/geoip/geoip2/geolite2/)
@@ -361,8 +382,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-*async* **lookupState(ip: string):Promise<IStateResponse | null>**
+***
+*async* **lookupState(ip: string):Promise<IStateResponse | null>** <a name="lookupstate"></a>
 
 * **ip** - *(string)* - IP to find result for.
 
@@ -392,7 +413,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 Function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupState(ip: string, target: TState, threshold: number):Promise<boolean>**
+*async* **lookupState(ip: string, target: TState, threshold: number):Promise\<boolean>**
 
 * **ip** - *(string)* - IP to find result for.
 * **target** - *(TState)* - Country ISO code.
@@ -411,8 +432,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-*async* **lookupCountry(ip: string):Promise<ICountryResponse>**
+***
+*async* **lookupCountry(ip: string):Promise\<ICountryResponse>** <a name="lookupcountry"></a>
 
 * **ip** - *(string)* - IP to find result for.
 
@@ -440,7 +461,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 Function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupCountry(ip: string, target: TCountry, threshold: number):Promise<boolean>**
+*async* **lookupCountry(ip: string, target: TCountry, threshold: number):Promise\<boolean>**
 
 * **ip** - *(string)* - IP to find result for.
 * **target** - *(TCountry)* - Country ISO code.
@@ -459,8 +480,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-*async* **lookupContinent(ip: string): Promise<IContinentResponse>**
+***
+*async* **lookupContinent(ip: string): Promise\<IContinentResponse>** <a name="lookupcontinent"></a>
 
 * **ip** - *(string)* - IP to find result for.
 
@@ -488,7 +509,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 Function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupContinent(ip: string, target: TContinent, threshold: number): Promise<boolean>**
+*async* **lookupContinent(ip: string, target: TContinent, threshold: number): Promise\<boolean>**
 
 * **ip** - *(string)* - IP to find result for.
 * **target** - *(TContinent)* - Continent ISO code.
@@ -507,8 +528,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-**lookupAsn(ip: string): IAsnResponse**
+***
+**lookupAsn(ip: string): IAsnResponse** <a name="lookupasn"></a>
 
 * **ip** - *(string)* - IP to find ASN for.
 
@@ -534,8 +555,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-**isIpInRange(ip: TIp, startIp: TIp, endIp: TIp): boolean**
+***
+**isIpInRange(ip: TIp, startIp: TIp, endIp: TIp): boolean** <a name="isipinrange"></a>
 
 * **ip** - *(TIp)* - Ip to check, `needle`.
 * **startIp** - *(TIp)* - `haystack` start.
@@ -554,8 +575,8 @@ async function onRequest(req: IRequest, res: IResponse) {
 ...
 }
 ```
-
-**isIpInMask(ip: TIp, ipMask: TSubnetMask): boolean**
+***
+**isIpInMask(ip: TIp, ipMask: TSubnetMask): boolean** <a name="isipinmask"></a>
 
 * **ip** - *(TIp)* - Ip to check, `needle`.
 * **ipMask** - *(TSubnetMask)* - `haystack`.
