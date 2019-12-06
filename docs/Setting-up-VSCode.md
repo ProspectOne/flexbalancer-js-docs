@@ -41,20 +41,7 @@ declare interface ICountryResponse {
 ...
 
 
-declare interface IResponse {
-    /**
-     * List should contains only hostnames
-     * or only IPs but not mixed.
-     */
-    addr: string | string[];
-
-    /**
-     * Time to live in seconds
-     */
-    ttl: number;
-}
-
-declare function onRequest(request: IRequest, response: IResponse): Promise<IResponse>;
+declare function onRequest(request: IRequest, response: IResponse): Promise<void>;
 ```
  Select them all, Copy and Paste all that lines to that `definitions.d.ts` file that you have created at your workspace. Save the file.
  

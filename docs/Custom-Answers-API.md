@@ -25,7 +25,7 @@ The typical format for Custom Answer is:
 async function onRequest(req: IRequest, res: IResponse) {
     // Logic goes here
     ...
-    res.addr = 'myanswer.net';
+    res.setAddr('myanswer.net');
     return res;
 }
 ```
@@ -34,7 +34,7 @@ As you can see, we have chosen [TypeScript](https://www.typescriptlang.org/) as 
 
 ### Main Function
 
-*async* **onRequest(request: IRequest, response: IResponse): Promise\<IResponse>**
+*async* **onRequest(request: IRequest, response: IResponse): Promise\<void>**
 
 * **request** - *(IRequest)* - User request data passed to answer by flexbalancer.
 * **response** - *(IResponse)* - Answer response, that is modified by custom answer logic.
@@ -45,18 +45,18 @@ For example, you want to set particular answer for users from `France`.
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
     if(req.location.country && req.location.country == 'FR') {
-        res.addr = 'answer.mysite.fr';
-        res.ttl = 25;
+        res.setAddr('answer.mysite.fr');
+        res.setTTL(25);
 
         return res;
     }
 
-    res.addr = 'mysite.net';
+    res.setAddr('mysite.net');
     return res;
 }
 ```
 
-Interfaces implemented by `req` and `res` : 
+Interfaces implemented by `request` and `response` : 
 
 ### Interfaces
 
@@ -99,12 +99,11 @@ declare interface IResponse {
      * List should contains only hostnames
      * or only IPs but not mixed.
      */
-    addr: string | string[];
-
+    setAddr(addr: string | string[]): void;
     /**
      * Time to live in seconds
      */
-    ttl: number;
+    setTTL(ttl: number): void;
 }
 ```
 Types that are used at that interfaces are listed at section below.
@@ -175,7 +174,7 @@ Aliases for CDN Providers:
 | jsdelivr-cdn | jsDelivr CDN |
 | stackpath-cdn | StackPath CDN |
 | cdnnet | CDN.NET |
-| cdnetworks| CDNetworks |
+| quantil| CDNetworks |
 | verizon-edgecast-cdn | Verizon (Edgecast) CDN |
 | azure-cdn | Azure CDN |
 | cachefly | CacheFly |
@@ -425,7 +424,7 @@ Example:
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupState(req.ip, "AL", 10);
+    let ipBelongsTo = await lookupState(req.ip, 'AL', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -473,7 +472,7 @@ Example:
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupCountry(req.ip, "FR", 10);
+    let ipBelongsTo = await lookupCountry(req.ip, 'FR', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -521,7 +520,7 @@ Example:
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupCountry(req.ip, "SA", 10);
+    let ipBelongsTo = await lookupCountry(req.ip, 'SA', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -568,7 +567,7 @@ Example:
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    if(isIpInRange(req.ip, "192.168.0.1", "192.168.0.250")) {
+    if(isIpInRange(req.ip, '192.168.0.1', '192.168.0.250')) {
         ...​
         return res;
     }
@@ -587,9 +586,9 @@ Example:
 
 ```typescript
 async function onRequest(req: IRequest, res: IResponse) {
-    if(isIpInMask(req.ip, "145.2.3.4/16")) {
-        res.addr = ['mask16.com'];
-        res.ttl = 30;
+    if(isIpInMask(req.ip, '145.2.3.4/16')) {
+        res.setAddr(['mask16.com']);
+        res.setTTL(30);
         ...​
         return res;
     }

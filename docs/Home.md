@@ -8,7 +8,7 @@ With Custom Code FlexBalancer feature you are able to write your own javascript 
 
 * [Create your PerfOps account](https://panel.perfops.net/register) (if you don't have it yet)
 * [[Create your first FlexBalancer with Custom Answer|Quick-Start]]
-* [[Learn how to create your custom scripts|Quick-Tutorial]]
+* [[Learn how to create your custom scripts|Tutorial]]
 
 # Next steps
 
