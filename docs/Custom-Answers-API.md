@@ -1,6 +1,6 @@
 # FlexBalancer Custom Answers API
 1. [Application](#application)
-    * [Main function (onRequest)](#main-function)
+    * [The Main function (onRequest)](#main-function)
     * [Interfaces](#interfaces)
 2. [Provided functions](#provided-functions)
     * [Types](#types)
@@ -19,22 +19,11 @@
 
 ## Application 
 
-The typical format for Custom Answer is:
+We have chosen [TypeScript](https://www.typescriptlang.org/) as a programming language for our Custom Answers. It has a lot of advantages and in most cases does not cause any problems for people who used JavaScript before.  
 
-```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    // Logic goes here
-    ...
-    res.setAddr('myanswer.net');
-    return res;
-}
-```
+### The Main Function
 
-As you can see, we have chosen [TypeScript](https://www.typescriptlang.org/) as a programming language for Custom Answers. It has a lot of advantages and in most cases does not cause any problems for people who used JavaScript before.  
-
-### Main Function
-
-*async* **onRequest(request: IRequest, response: IResponse): Promise\<void>**
+**onRequest(request: IRequest, response: IResponse)**
 
 * **request** - *(IRequest)* - User request data passed to answer by flexbalancer.
 * **response** - *(IResponse)* - Answer response, that is modified by custom answer logic.
@@ -43,7 +32,7 @@ The main function that determines answer behavior. Usually all logic is stored i
 For example, you want to set particular answer for users from `France`.
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     if(req.location.country && req.location.country == 'FR') {
         res.setAddr('answer.mysite.fr');
         res.setTTL(25);
@@ -56,7 +45,7 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Interfaces implemented by `request` and `response` : 
+The interfaces implemented by `request` and `response` : 
 
 ### Interfaces
 
@@ -96,34 +85,39 @@ declare interface IRequest {
 ```typescript
 declare interface IResponse {
     /**
-     * List should contains only hostnames
-     * or only IPs but not mixed.
+    * Set the result to a single address
+    */
+    setAddr(addr: string): void;
+
+    /**
+     * Add address to the results for a multi-address answer
      */
-    setAddr(addr: string | string[]): void;
+    addAddr(addr: string): void;
+
     /**
      * Time to live in seconds
      */
     setTTL(ttl: number): void;
 }
 ```
-Types that are used at that interfaces are listed at section below.
+Types that are used at that interfaces are listed at the section below.
 
 ## Provided functions
 
-We have prepared list of helpful types and functions that can be used inside your application.
+We have prepared the list of helpful types and functions that can be used inside your application.
 
 ### Types
 
 **TIp**
 
-Type for IP-address.
+The IP-address type.
 ```typescript
 declare type TIp = string;
 ```
 ***
 **TCountry**
 
-Enumeration contains countries ISO-codes.
+This enumeration contains countries ISO-codes.
 ```typescript
 declare type TCountry = 'DZ' | 'AO' | 'BJ' | 'BW' | 'BF' ...  'PR' | 'GU';
 ```
@@ -131,14 +125,14 @@ See [ISO codes on Wikipedia](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Off
 ***
 **TContinent**
 
-ISO codes for continents enumeration.
+The ISO codes for the continents enumeration.
 ```typescript
 declare type TContinent = 'AF' | 'AS' | 'EU' | 'NA' | 'OC' | 'SA';
 ```
 ***
 **TState**
 
-ISO codes for the US states.
+The ISO codes for the US states.
 ```typescript
 declare type TState = 'AL' | 'AK' | 'AZ' | 'AR' | 'CA' ...  'WI' | 'WY';
 ```
@@ -146,7 +140,7 @@ See [US-states ISO codes on Wikipedia](https://en.wikipedia.org/wiki/ISO_3166-2:
 ***
 **TCDNProvider**
 
-Type represent list of CDN providers aliases.
+This type represents the list of the CDN providers aliases:
 
 ```typescript
 /**
@@ -156,7 +150,7 @@ Type represent list of CDN providers aliases.
  */
 declare type TCDNProvider = 'belugacdn' | 'ovh-cdn' | ... | 'medianova';
 ```
-Aliases for CDN Providers:
+The aliases for the CDN Providers:
 
 | Alias | CDN Provider |
 |:------|:----------------|
@@ -182,7 +176,7 @@ Aliases for CDN Providers:
 ***
 **TMonitor**
 
-User monitors ids. Type is generated based on list of your monitors IDs. If you don't have any - it is empty.
+This type is generated based on the list of your monitors IDs. If you don't have any - it is equal to `null`.
 
 ```typescript
 /**
@@ -190,33 +184,33 @@ User monitors ids. Type is generated based on list of your monitors IDs. If you 
  * monitor IDs, which are available
  * for usage inside custom code
  */
-declare type TMonitor = ;
+declare type TMonitor = null;
 ```
 
-For example, can be
+For example, it can be:
 ```typescript
 declare type TMonitor = 307 | 308;
 ```
-If user created monitors that got ids 307 and 308.
+If you have created monitors that got the ids 307 and 308.
 ***
 **TSubnetMask**
 
-Implement if you need to use subnet parameter.
+Implement if you need to use a subnet parameter.
 
 ```typescript
 declare type TSubnetMask = string;
 ```
 ***
-**TRUMLocationSelectorState**
-**TRUMLocationSelectorCountry**
-**TRUMLocationSelectorContinent**
+**TLocationSelectorState**
+**TLocationSelectorCountry**
+**TLocationSelectorContinent**
 
-Types are related fo second param at *fetchCdnRumUptime*, *fetchCdnRumPerformance* functions, listed below. Determine location type for search by ISO code.
+That types are related fo the second param of *fetchCdnRumUptime*, *fetchCdnRumPerformance* functions, that are listed below. Are used to determine location type for search by the ISO code.
 
 ```typescript
-declare type TRUMLocationSelectorState = 'state';
-declare type TRUMLocationSelectorCountry = 'country';
-declare type TRUMLocationSelectorContinent = 'continent';
+declare type TLocationSelectorState = 'state';
+declare type TLocationSelectorCountry = 'country';
+declare type TLocationSelectorContinent = 'continent';
 ```
 
 ### Functions
@@ -225,12 +219,12 @@ declare type TRUMLocationSelectorContinent = 'continent';
 
 * **monitor** - *(TMonitor)* - User Monitor ID.
 
-Returns monitor uptime value, monitor id is passed as an argument.
+Returns your monitor uptime value, a monitor id is passed as an argument.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     ...
     if(fetchMonitorUptime(305) > 95) {
     ...
@@ -243,12 +237,12 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 * **monitor** - *(TMonitor)* - User Monitor ID.
 
-Returns boolean value depending on monitor online status (active/inactive).
+Returns boolean value depending on your monitor online status (active/inactive).
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     ...
     if(isMonitorOnline(305) === true) {
     ...
@@ -259,14 +253,14 @@ async function onRequest(req: IRequest, res: IResponse) {
 ***
 **fetchCdnRumUptime(provider: TCDNProvider): number** <a name="fetchcdnrumuptime"></a>
 
-* **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
+* **provider** - *(TCDNProvider)* - the provider alias, described at the `Types` section.
 
-Returns world uptime value for particular CDN provider. 
+Returns world uptime value for the particular CDN provider. 
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     if(fetchCdnRumUptime('jsdelivr-cdn') > 98.5) {
     ...
     }
@@ -274,20 +268,20 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Function also accepts additional parameters `selector` and `identifier`:
+This function also accepts additional parameters `selector` and `identifier`:
 
 **fetchCdnRumUptime(provider: TCDNProvider, selector?, identifier?): number**
 
-* **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
-* **selector** - *(TRUMLocationSelectorContinent | TRUMLocationSelectorCountry | TRUMLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
-* **identifier** - *(TContinent | TCountry | TState)* - location ISO, described at `Types` section.
+* **provider** - *(TCDNProvider)* - the provider alias, described at `Types` section.
+* **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
+* **identifier** - *(TContinent | TCountry | TState)* - the location ISO, described at `Types` section.
 
-Returns location-based uptime value for particular CDN provider.
+Returns location-based uptime value for the particular CDN provider.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     if(fetchCdnRumUptime('jsdelivr-cdn', 'continent', 'EU') > 99) {
     ...
     }
@@ -299,45 +293,45 @@ async function onRequest(req: IRequest, res: IResponse) {
 
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 
-Similar to the previous function but returns RUM Performance value. Returns world performance value.
+Similar to the previous function but returns World RUM Performance value.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    if(fetchCdnRumPerformance('jsdelivr-cdn') > 98.5) {
+function onRequest(req: IRequest, res: IResponse) {
+    if(fetchCdnRumPerformance('jsdelivr-cdn') < 33) {
     ...
     }
 ...
 }
 ```
 
-Function also accepts additional parameters `selector` and `identifier`:
+This function also accepts additional parameters `selector` and `identifier`:
 
 **fetchCdnRumPerformance(provider: TCDNProvider, selector?, identifier?): number**
 
-* **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
-* **selector** - *(TRUMLocationSelectorContinent | TRUMLocationSelectorCountry | TRUMLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
+* **provider** - *(TCDNProvider)* - the provider alias, described at `Types` section.
+* **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
 * **identifier** - *(TContinent | TCountry | TState)* - location ISO, described at `Types` section.
 
-Returns location-based performance value. 
+Returns the location-based performance value. 
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    if(fetchCdnRumPerformance('jsdelivr-cdn', 'country', 'FR') > 99) {
+function onRequest(req: IRequest, res: IResponse) {
+    if(fetchCdnRumPerformance('jsdelivr-cdn', 'country', 'FR') < 40) {
     ...
     }
 ...
 }
 ```
 ***
-*async* **lookupCity(ip: string):Promise<ICityResponse | null>** <a name="lookupcity"></a>
+**lookupCity(ip: string): ICityResponse | null** <a name="lookupcity"></a>
 
-* **ip** - *(string)* - IP to find result for.
+* **ip** - *(string)* - the IP to find result for.
 
-Finds the city IP belongs to. Resolves result that implements  `ICityResponse`:
+Finds the city IP belongs to. Returns a result that implements  `ICityResponse`:
 
 ```typescript
 declare interface ICityResponse {
@@ -346,13 +340,13 @@ declare interface ICityResponse {
 }
 ``` 
  
-or `null` if IP does not belong to any city.
+or `null` if the IP does not belong to any city.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let cityInfo = await lookupCity(req.ip);
+function onRequest(req: IRequest, res: IResponse) {
+    let cityInfo = lookupCity(req.ip);
     if(cityInfo.name == 'Washington') {
     ...
     }
@@ -360,21 +354,21 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Function also accepts additional parameters `target` and `threshold`:
+This function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupCity(ip: string, target: number, threshold: number):Promise\<boolean>**
+**lookupCity(ip: string, target: number, threshold: number): boolean**
 
-* **ip** - *(string)* - IP to find result for.
-* **target** - *(number)* - targeted city geoname id. Can be found at [MaxMind GeoLite2 Databases](https://dev.maxmind.com/geoip/geoip2/geolite2/)
-* **threshold** - *(number)* - distance threshold.
+* **ip** - *(string)* - the IP to find result for.
+* **target** - *(number)* - the targeted city geoname id. Can be found at [MaxMind GeoLite2 Databases](https://dev.maxmind.com/geoip/geoip2/geolite2/)
+* **threshold** - *(number)* - the distance threshold.
 
-Finds if IP belongs to particular city. Resolves `boolean`.
+Finds if the IP provided belongs to the particular city. Returns `boolean`.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupCity(req.ip, 637896, 10);
+function onRequest(req: IRequest, res: IResponse) {
+    let ipBelongsTo = lookupCity(req.ip, 637896, 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -382,11 +376,11 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 ***
-*async* **lookupState(ip: string):Promise<IStateResponse | null>** <a name="lookupstate"></a>
+**lookupState(ip: string): IStateResponse | null** <a name="lookupstate"></a>
 
-* **ip** - *(string)* - IP to find result for.
+* **ip** - *(string)* - the IP to find result for.
 
-Finds the US state IP belongs to. Resolves result that implements  `IStateResponse` :
+Finds the US state the IP provided belongs to. Returns a result that implements  `IStateResponse` :
 
 ```typescript
 declare interface IStateResponse {
@@ -396,13 +390,13 @@ declare interface IStateResponse {
 }
 ```
 
-or `null` if IP does not belong to the US.
+or `null` if the IP does not belong to the US.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let stateInfo = await lookupState(req.ip);
+function onRequest(req: IRequest, res: IResponse) {
+    let stateInfo = lookupState(req.ip);
     if(stateInfo.isoCode == 'PA') {
     ...
     }
@@ -410,21 +404,21 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Function also accepts additional parameters `target` and `threshold`:
+This function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupState(ip: string, target: TState, threshold: number):Promise\<boolean>**
+**lookupState(ip: string, target: TState, threshold: number): boolean**
 
-* **ip** - *(string)* - IP to find result for.
-* **target** - *(TState)* - Country ISO code.
-* **threshold** - *(number)* - distance threshold.
+* **ip** - *(string)* - the IP to find result for.
+* **target** - *(TState)* - the country ISO code.
+* **threshold** - *(number)* - the distance threshold.
 
-Finds if IP belongs to the particular US State. Resolves `boolean`.
+Finds if the IP provided belongs to the particular US State. Returns `boolean`.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupState(req.ip, 'AL', 10);
+function onRequest(req: IRequest, res: IResponse) {
+    let ipBelongsTo = lookupState(req.ip, 'AL', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -432,11 +426,11 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 ***
-*async* **lookupCountry(ip: string):Promise\<ICountryResponse>** <a name="lookupcountry"></a>
+**lookupCountry(ip: string): ICountryResponse** <a name="lookupcountry"></a>
 
-* **ip** - *(string)* - IP to find result for.
+* **ip** - *(string)* - the IP to find result for.
 
-Finds the country IP belongs to. Resolves result that implements `ICountryResponse`:
+Finds the country the IP provided belongs to. Returns a result that implements `ICountryResponse`:
 
 ```typescript
 declare interface ICountryResponse {
@@ -449,8 +443,8 @@ declare interface ICountryResponse {
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let countryInfo = await lookupCountry(req.ip);
+function onRequest(req: IRequest, res: IResponse) {
+    let countryInfo = lookupCountry(req.ip);
     if(countryInfo.isoCode == 'UK') {
     ...
     }
@@ -458,21 +452,21 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Function also accepts additional parameters `target` and `threshold`:
+This function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupCountry(ip: string, target: TCountry, threshold: number):Promise\<boolean>**
+**lookupCountry(ip: string, target: TCountry, threshold: number): boolean**
 
-* **ip** - *(string)* - IP to find result for.
-* **target** - *(TCountry)* - Country ISO code.
-* **threshold** - *(number)* - distance threshold.
+* **ip** - *(string)* - the IP to find result for.
+* **target** - *(TCountry)* - the country ISO code.
+* **threshold** - *(number)* - the distance threshold.
 
-Finds if IP belongs to particular country. Resolves `boolean`.
+Finds if the IP provided belongs to the particular country. Returns `boolean`.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupCountry(req.ip, 'FR', 10);
+function onRequest(req: IRequest, res: IResponse) {
+    let ipBelongsTo = lookupCountry(req.ip, 'FR', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -480,11 +474,11 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 ***
-*async* **lookupContinent(ip: string): Promise\<IContinentResponse>** <a name="lookupcontinent"></a>
+**lookupContinent(ip: string): IContinentResponse** <a name="lookupcontinent"></a>
 
-* **ip** - *(string)* - IP to find result for.
+* **ip** - *(string)* - the IP to find result for.
 
-Finds the continent IP belongs to. Resolves result that implements `IContinentResponse`:
+Finds the continent the IP provided belongs to. Returns a result that implements `IContinentResponse`:
 
 ```typescript
 declare interface IContinentResponse {
@@ -497,8 +491,8 @@ declare interface IContinentResponse {
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let continentInfo = await lookupContinent(req.ip);
+function onRequest(req: IRequest, res: IResponse) {
+    let continentInfo = lookupContinent(req.ip);
     if(continentInfo.isoCode == 'NA') {
     ...
     }
@@ -506,21 +500,21 @@ async function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-Function also accepts additional parameters `target` and `threshold`:
+This function also accepts additional parameters `target` and `threshold`:
 
-*async* **lookupContinent(ip: string, target: TContinent, threshold: number): Promise\<boolean>**
+**lookupContinent(ip: string, target: TContinent, threshold: number): boolean**
 
-* **ip** - *(string)* - IP to find result for.
-* **target** - *(TContinent)* - Continent ISO code.
-* **threshold** - *(number)* - distance threshold.
+* **ip** - *(string)* - the IP to find result for.
+* **target** - *(TContinent)* - the continent ISO code.
+* **threshold** - *(number)* - the distance threshold.
 
-Finds if IP belongs to particular continent. If Promise is fulfilled - resolves `boolean`.
+Finds if the IP provided belongs to the particular continent. Returns `boolean`.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupCountry(req.ip, 'SA', 10);
+function onRequest(req: IRequest, res: IResponse) {
+    let ipBelongsTo = await lookupContinent(req.ip, 'SA', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -530,9 +524,9 @@ async function onRequest(req: IRequest, res: IResponse) {
 ***
 **lookupAsn(ip: string): IAsnResponse** <a name="lookupasn"></a>
 
-* **ip** - *(string)* - IP to find ASN for.
+* **ip** - *(string)* - the IP to find the ASN for.
 
-Returns ASN for IP provided.
+Returns the ASN for the IP provided.
  
 The result implements `IAsnResponse` interface:
 
@@ -546,8 +540,9 @@ declare interface IAsnResponse {
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
-    if(lookupAsn(req.ip) == 'AS15169') {
+function onRequest(req: IRequest, res: IResponse) {
+    let asnInfo = lookupAsn(req.ip);
+    if(asnInfo && asnInfo.autonomousSystemNumber == 'AS15169') {
         ...​
         return res;
     }
@@ -557,16 +552,16 @@ async function onRequest(req: IRequest, res: IResponse) {
 ***
 **isIpInRange(ip: TIp, startIp: TIp, endIp: TIp): boolean** <a name="isipinrange"></a>
 
-* **ip** - *(TIp)* - Ip to check, `needle`.
-* **startIp** - *(TIp)* - `haystack` start.
-* **endIp** - *(TIp)* - `haystack` end.
+* **ip** - *(TIp)* - the IP to check, `needle`.
+* **startIp** - *(TIp)* - the `haystack` start.
+* **endIp** - *(TIp)* - the `haystack` end.
 
-Checks if IP belongs to range provided. Returns boolean.
+Checks if the IP belongs to the range provided. Returns boolean.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     if(isIpInRange(req.ip, '192.168.0.1', '192.168.0.250')) {
         ...​
         return res;
@@ -577,15 +572,15 @@ async function onRequest(req: IRequest, res: IResponse) {
 ***
 **isIpInMask(ip: TIp, ipMask: TSubnetMask): boolean** <a name="isipinmask"></a>
 
-* **ip** - *(TIp)* - Ip to check, `needle`.
-* **ipMask** - *(TSubnetMask)* - `haystack`.
+* **ip** - *(TIp)* - the IP to check, the `needle`.
+* **ipMask** - *(TSubnetMask)* - the `haystack`.
 
-Checks if IP belongs to net mask provided. Returns boolean.
+Checks if the IP belongs to the net mask provided. Returns boolean.
 
 Example:
 
 ```typescript
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     if(isIpInMask(req.ip, '145.2.3.4/16')) {
         res.setAddr(['mask16.com']);
         res.setTTL(30);

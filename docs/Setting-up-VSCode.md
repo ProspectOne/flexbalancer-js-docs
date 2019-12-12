@@ -41,7 +41,7 @@ declare interface ICountryResponse {
 ...
 
 
-declare function onRequest(request: IRequest, response: IResponse): Promise<void>;
+declare function onRequest(request: IRequest, response: IResponse);
 ```
  Select them all, Copy and Paste all that lines to that `definitions.d.ts` file that you have created at your workspace. Save the file.
  

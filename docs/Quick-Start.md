@@ -30,16 +30,16 @@ Let's create our first Custom FlexBalancer with the simpliest logic: we will che
  * If jsDelivr uptime is bigger than 98,5 - return 'google.com' with TTL 25
  * else return 'perfops.net' with default TTL 
  */
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     if(fetchCdnRumUptime('jsdelivr-cdn') > 98.5) { // if jsDelivr uptime is high
         res.setAddr('google.com'); // we set answer address to 'google.com' 
         res.setTTL(25); // with TTL = 25
 
-        return res; // return answer
+        return; // return answer
     }
     // if jsDelivr uptime is lower than expected
     res.setAddr('perfops.net'); // we set answer address to 'perfops.net'
-    return res; // return answer
+    return; // return answer
 }
 ```
 The text editor checks your code syntax for errors, shows error details on mouse hover and won't allow you to publish code with errors:
