@@ -37,11 +37,11 @@ function onRequest(req: IRequest, res: IResponse) {
         res.setAddr('answer.mysite.fr');
         res.setTTL(25);
 
-        return res;
+        return;
     }
 
     res.setAddr('mysite.net');
-    return res;
+    return;
 }
 ```
 
@@ -544,7 +544,7 @@ function onRequest(req: IRequest, res: IResponse) {
     let asnInfo = lookupAsn(req.ip);
     if(asnInfo && asnInfo.autonomousSystemNumber == 'AS15169') {
         ...​
-        return res;
+        return;
     }
 ...
 }
@@ -564,7 +564,7 @@ Example:
 function onRequest(req: IRequest, res: IResponse) {
     if(isIpInRange(req.ip, '192.168.0.1', '192.168.0.250')) {
         ...​
-        return res;
+        return;
     }
 ...
 }
@@ -585,7 +585,7 @@ function onRequest(req: IRequest, res: IResponse) {
         res.setAddr(['mask16.com']);
         res.setTTL(30);
         ...​
-        return res;
+        return;
     }
 ...
 }
