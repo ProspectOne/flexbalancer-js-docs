@@ -1,3 +1,4 @@
+///<reference path="../docs/definitions.d.ts"/>
 // Geographic Round Robin with Sonar Availability
 const configuration = {
     providers: [
@@ -41,7 +42,7 @@ const isProperCandidate = (candidate, requireMonitorData) => {
     return !requireMonitorData;
 };
 
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     const {countriesAnswersRoundRobin, providers, defaultTtl, requireMonitorData} = configuration;
 
     // Country where request was made from
@@ -56,10 +57,9 @@ async function onRequest(req: IRequest, res: IResponse) {
         );
         // If we found proper geo candidates, return one of them by random
         if (geoFilteredCandidates.length) {
-            return {
-                addr: getRandomElement(geoFilteredCandidates).cname,
-                ttl: defaultTtl
-            }
+            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setTTL(defaultTtl);
+            return;
         }
     }
 
@@ -68,14 +68,12 @@ async function onRequest(req: IRequest, res: IResponse) {
 
     //Choose random candidate as response if we have any
     if (properCandidates.length) {
-        return {
-            addr: getRandomElement(properCandidates).cname,
-            ttl: defaultTtl
-        }
+        res.setAddr(getRandomElement(properCandidates).cname);
+        res.setTTL(defaultTtl);
+        return;
     }
     // Fallback pick 'origin' cname
-    return {
-        addr: 'www.origin.com',
-        ttl: defaultTtl
-    };
+    res.setAddr('www.origin.com');
+    res.setTTL(defaultTtl);
+    return;
 }

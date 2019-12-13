@@ -1,3 +1,4 @@
+///<reference path="../docs/definitions.d.ts"/>
 // Weighted Round Robin
 // Main configuration
 const configuration = {
@@ -36,7 +37,7 @@ const getHighestByProperty = <T>(array: T[], property):T => array[getHighest(arr
  */
 const getSumByProperty = <T>(items:T[], property): number => items.reduce((sum, item) => sum += item[property],0);
 
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     const {providers, defaultTtl, availabilityThreshold} = configuration;
 
     // Choose providers that have 'UPTIME' value more that threshold.
@@ -57,17 +58,15 @@ async function onRequest(req: IRequest, res: IResponse) {
             })
         );
         // Return Object with default ttl and take providers from array with highest uptime' value
-        return {
-            addr: getHighestByProperty(CDNUptimeData, 'uptime').provider.cname,
-            ttl: defaultTtl
-        };
+        res.setAddr(getHighestByProperty(CDNUptimeData, 'uptime').provider.cname);
+        res.setTTL(defaultTtl);
+        return;
     }
     // If we have single available result simply return it
     if (availableProviders.length === 1) {
-        return {
-            addr: availableProviders[0].cname,
-            ttl: defaultTtl
-        };
+        res.setAddr(availableProviders[0].cname);
+        res.setTTL(defaultTtl);
+        return;
     }
     // If we have bunch of available result pick one randomly weighted
     const random = Math.floor(Math.random() * totalWeight);
@@ -81,8 +80,7 @@ async function onRequest(req: IRequest, res: IResponse) {
         }
     }
     // Return Object with default ttl and chosen provider
-    return {
-        addr: availableProviders[weightedProviderIndex].cname,
-        ttl: defaultTtl
-    }
+    res.setAddr(availableProviders[weightedProviderIndex].cname);
+    res.setTTL(defaultTtl);
+    return;
 }

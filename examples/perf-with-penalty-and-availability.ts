@@ -1,3 +1,4 @@
+///<reference path="../docs/definitions.d.ts"/>
 // Basic configuration object for our FlexBalancer application
 const configuration = {
     // List of providers we are interested in
@@ -40,7 +41,7 @@ const getLowest = (array: number[]): number => array.indexOf(Math.min(...array))
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
-async function onRequest(req: IRequest, res: IResponse) {
+function onRequest(req: IRequest, res: IResponse) {
     const {availabilityThreshold, defaultProvider, providers, defaultTtl} = configuration;
     let decision;
 
@@ -65,18 +66,16 @@ async function onRequest(req: IRequest, res: IResponse) {
     // If we have a providers to choose from - choose one with the best performance
     if (providersPerformance.length) {
         decision = getLowestByProperty(providersPerformance, 'performance').provider;
-        return {
-            addr: decision.cname,
-            ttl: decision.ttl ? decision.ttl : defaultTtl
-        };
+        res.setAddr(decision.cname);
+        res.setTTL(decision.ttl ? decision.ttl : defaultTtl);
+        return;
     }
 
     // No available providers - return default
     decision = providers.find(provider => provider.name === defaultProvider);
 
     // Prepare response
-    return {
-        addr: decision.cname,
-        ttl: decision.ttl ? decision.ttl : defaultTtl
-    }
+    res.setAddr(decision.cname);
+    res.setTTL(decision.ttl ? decision.ttl : defaultTtl);
+    return;
 }

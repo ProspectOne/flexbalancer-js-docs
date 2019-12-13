@@ -1,3 +1,4 @@
+///<reference path="../docs/definitions.d.ts"/>
 // Main configuration
 const configuration = {
     /** List of providers configuration */
@@ -112,7 +113,7 @@ const getHighest = (array: number[]): number => array.indexOf(Math.max(...array)
  */
 const getRandom = <T>(items:T[]):T =>  items[Math.floor(Math.random() * items.length)];
 
-async function onRequest(request: IRequest, response: IResponse): Promise<IResponse> {
+function onRequest(request: IRequest, response: IResponse) {
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     const { continent } = request.location;
 
@@ -126,10 +127,9 @@ async function onRequest(request: IRequest, response: IResponse): Promise<IRespo
 
     // Return random provider from available.
     if (!availableProviders.length) { // availableProviders
-        return {
-            addr: getRandom(providers).cname,
-            ttl: defaultTtl
-        };
+        response.setAddr(getRandom(providers).cname);
+        response.setTTL(defaultTtl);
+        return;
     }
 
     // Else create array with performance data for each provider
@@ -151,8 +151,7 @@ async function onRequest(request: IRequest, response: IResponse): Promise<IRespo
     );
 
     // Return as default, provider with highest score
-    return {
-        addr: cdnPerformanceData[getHighest(totalScores)].provider.cname,
-        ttl: defaultTtl
-    }
+    response.setAddr(cdnPerformanceData[getHighest(totalScores)].provider.cname);
+    response.setTTL(defaultTtl);
+    return;
 }

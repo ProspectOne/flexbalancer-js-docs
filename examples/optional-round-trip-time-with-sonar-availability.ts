@@ -1,3 +1,4 @@
+///<reference path="../docs/definitions.d.ts"/>
 // Optimal Round Trip Time with Sonar Availability
 // Main configuration
 const configuration = {
@@ -39,7 +40,7 @@ const getLowest = (array: number[]): number => array.indexOf(Math.min(...array))
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 
-async function onRequest(req: Request, res: Response) {
+function onRequest(req: IRequest, res: IResponse) {
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     // Filter providers by monitor, check it's state to be 'UP'
     const monitorFilteredProviders = providers.filter(
@@ -47,10 +48,9 @@ async function onRequest(req: Request, res: Response) {
     );
     // If all monitors are 'DOWN' state, choose random provider.
     if (monitorFilteredProviders.length === 0) {
-        return {
-            addr: providers[Math.floor(Math.random() * providers.length)].cname,
-            ttl: defaultTtl
-        }
+        res.setAddr(providers[Math.floor(Math.random() * providers.length)].cname);
+        res.setTTL(defaultTtl);
+        return;
     }
     // Filter from result. Choose providers that have 'UPTIME' value more that threshold.
     const availableFilteredProviders = monitorFilteredProviders.filter(
@@ -66,10 +66,9 @@ async function onRequest(req: Request, res: Response) {
             })
         );
         // Return as a result Object with defaultTtl and take providers from array with lowest performance value
-        return {
-            addr: getLowestByProperty(perfProvidersData, 'perf').provider.cname,
-            ttl: defaultTtl
-        }
+        res.setAddr(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
+        res.setTTL(defaultTtl);
+        return;
     }
 
     // Fallback. Create array map with performance data for each providers from original list
@@ -80,8 +79,7 @@ async function onRequest(req: Request, res: Response) {
         })
     );
     // Return as a result Object with defaultTtl and take providers from array with highest performance value
-    return {
-        addr: getHighestByProperty(perfProvidersData, 'perf').provider.cname,
-        ttl: defaultTtl
-    }
+    res.setAddr(getHighestByProperty(perfProvidersData, 'perf').provider.cname);
+    res.setTTL(defaultTtl);
+    return;
 }
