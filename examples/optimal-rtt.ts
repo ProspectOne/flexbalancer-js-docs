@@ -1,3 +1,4 @@
+///<reference path="../docs/definitions.d.ts"/>
 // Main configuration object
 const configuration = {
     /** List of  providers configuration */
@@ -66,7 +67,7 @@ const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array
 /**
  * Return response if proper candidate found for Country or Continent rule else returns null
  */
-const getGeoResponse = (location):IResponse | null => {
+const getGeoResponse = (location) => {
     let candidate;
     const {providers, countryToProvider, continentToProvider, defaultTtl} = configuration;
 
@@ -89,24 +90,27 @@ const getGeoResponse = (location):IResponse | null => {
     return null;
 };
 
-async function onRequest(request: IRequest, response: IResponse) {
+function onRequest(request: IRequest, response: IResponse) {
     let location = request.location, candidate, res;
     const {providers, geoDefault, geoOverride, asnOverride, asnToProvider, availabilityThreshold, defaultTtl, defaultProvider, errorTtl} = configuration;
 
     //Check if geoOverride is enabled and return response of override if it matches its rules
     if (geoOverride) {
-        res = getGeoResponse(location);
-        if (res) return res;
+        let resGeo = getGeoResponse(location);
+        if (resGeo) {
+            response.setAddr(resGeo.addr);
+            response.setTTL(resGeo.ttl);
+            return;
+        }
     }
 
     //Check if asn_override is enabled and return response of override if it matches its rules
     if (asnOverride && location.subnet.asn) {
         candidate = findByProperty(providers, 'name', asnToProvider[location.subnet.asn]);
         if (candidate) {
-            return {
-                addr: candidate.cname,
-                ttl: defaultTtl
-            };
+            response.setAddr(candidate.cname);
+            response.setTTL(defaultTtl);
+            return;
         }
     }
 
@@ -152,28 +156,30 @@ async function onRequest(request: IRequest, response: IResponse) {
                     fetchCdnRumPerformance(provider.name)) * (1 + provider.padding / 100)
             })
         );
-        return  {
-            addr: getLowestByProperty(performanceMapData, 'cdnPerformance').provider.cname,
-            ttl: defaultTtl
-        };
+        response.setAddr(getLowestByProperty(performanceMapData, 'cdnPerformance').provider.cname);
+        response.setTTL(defaultTtl);
+        return;
     }
 
     //Even if geoOverride disabled but we didnt found proper answer till that time, if geoDefault is enabled
     //we will try to find answer with geoOverrides
     if (geoDefault) {
-        res = getGeoResponse(location);
-        if (res) return res;
+        let res = getGeoResponse(location);
+        if (res) {
+            response.setAddr(res.addr);
+            response.setTTL(res.ttl);
+            return;
+        }
     }
 
     //return default
     candidate = findByProperty(providers, 'name', defaultProvider);
     if (candidate){
-        return {
-            addr: candidate,
-            ttl: defaultTtl
-        };
+        response.setAddr(candidate);
+        response.setTTL(defaultTtl);
+        return;
     }
     // Default Candidate also not found. Looks like configuration error
-    response.ttl = errorTtl;
-    return  response
+    response.setTTL(errorTtl);
+    return;
 }
