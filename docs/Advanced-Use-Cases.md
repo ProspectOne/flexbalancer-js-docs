@@ -5,7 +5,7 @@
     * [Case 2: Performance with Penalty and Availability.](#case2)
 
 # Basic Structure <a name="basic-structure"></a>
-In fact, a Custom Answer Configuration structure does not have any strict rules. Below, we just describe the structure, that, in our opinion, is the best one for a Custom Answer Script. So feel free to use your own approach, experiment and invent.
+In fact, a Custom Answer Configuration structure does not have any strict rules. Below, we just describe the *recommended* structure, that, in our opinion, is the best one for a Custom Answer Script. So feel free to use your own approach, experiment and invent.
 
 A typical Custom Answer has three 'sections':
 
@@ -27,7 +27,7 @@ function onRequest(req: IRequest, res: IResponse) {
 };
 ```
 
-* **configuration** - here you define a `configuration` object, it can define providers with some properties, useful sets of data, default properties etc. For example:
+* **configuration** - here you place a `configuration` object, it can define providers with some properties, useful sets of data, default properties etc. For example:
 ```typescript
 const configuration = {
     providers: [
@@ -87,7 +87,7 @@ const configuration = {
 const getLowest = (array: number[]): number => array.indexOf(Math.min(...array));
 ...
 ```
-* **onRequest** - `Main` Custom Answers function we operate with.
+* **onRequest** - The `Main` Custom Answers function we operate with.
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     let resultAnswer;
@@ -99,7 +99,7 @@ function onRequest(req: IRequest, res: IResponse) {
     return;
 }
 ``` 
-That's it! As we have mentioned, feel free to implement your own structure and solutions. The only **the must** is  `onRequest(req: IRequest, res: IResponse)` (Main function) usage.
+As we have mentioned, feel free to implement your own structure and solutions. The only **the must** is  `onRequest(req: IRequest, res: IResponse)` (Main function) usage.
 
 # Use Cases: <a name="use-cases"></a> 
 ## Case 1: Optimal Round Trip Time with Sonar Availability. <a name="case1"></a>
@@ -110,7 +110,7 @@ We need to get answer that has:
 * CDN provider availability higher than 90%
 * The best CDN provider performance. 
 
-In case of all monitors are down it should simply return a random answer. And if all CDN uptimes are 'poor' it should 'fall back' with the answer that has the worst provider performance.
+In case of all monitors are down it should simply return a random answer. And if all CDN uptimes are 'poor' it should fall back with the answer that has the worst provider performance.
 
 Let's create our `configuration` object:
 ```typescript
@@ -137,9 +137,9 @@ const configuration = {
     availabilityThreshold: 90 // Board value for providers to compare with
 };
 ```
-We take our Monitors IDs `monitorId: (302 as TMonitor),` from [PerfOps Panel Monitors Page](https://panel-perfops-net-release.herokuapp.com/monitors) and defined availability threshold to 90 (percent).
+We took our Monitors IDs `monitorId: (302 as TMonitor),` from the [PerfOps Panel Monitors Page](https://panel-perfops-net-release.herokuapp.com/monitors) and defined the availability threshold to 90 (percent).
 
-Now, let's fill in `functions` block with the set of functions that determine highest and lowest values for arrays and properties. Notice that that functions are pretty useful and can be added to other scripts if you use `configuration` approach described above.
+Now, let's fill in our `functions` block with the set of functions that determine highest and lowest values for arrays and properties. Notice: that functions are pretty useful and can be added to other scripts if you use the `configuration` approach described above.
 ```typescript
 /**
  * Returns index of highest number in array
@@ -158,7 +158,7 @@ const getLowest = (array: number[]): number => array.indexOf(Math.min(...array))
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 ```
-Let's parse the configuration and get providers with monitors online:
+Let's parse the configuration and get all providers that have monitors online:
 ```typescript
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     // Filter providers by monitor, check it's state to be 'UP'
@@ -175,14 +175,14 @@ Well... bad thing happened and all our monitors are down. We can't determine the
         return;
     }
 ```
-If everything is fine and we have monitored results - let's keep only those CDN providers that have availability more than 90 percents:
+If everything is fine and we have providers with working monitors - let's keep only those CDN providers that have availability more than 90 percents:
 ```typescript
     // Filter from result. Choose providers that have 'UPTIME' value more that threshold.
     const availableFilteredProviders = monitorFilteredProviders.filter(
         (provider) => fetchCdnRumUptime(provider.name) > availabilityThreshold
     );
 ```
-Everything is perfect, we have CDN providers with good uptime, let's analyze their performance data and return the one with the lowest performance value as the answer. Remember - [the lower 'performance' value - the better](https://www.cdnperf.com/) - it represents value based on response time, so yes- we need the lowest one.
+Everything is perfect, we have the list of CDN providers with good uptime, let's analyze their performance data and return the one with the lowest performance value as the answer. Remember - [the lower 'performance' value - the better](https://www.cdnperf.com/) - it represents value based on response time, so yes- we need the lowest one.
 ```typescript
     // If list filter result is not empty
     if (availableFilteredProviders.length) {
@@ -199,7 +199,7 @@ Everything is perfect, we have CDN providers with good uptime, let's analyze the
         return;
     }
 ```
-In case we have CDN availability lower than our threshold - let's simply return the answer with the worst performance as `fallback`:
+In case we have the CDN availability lower than our threshold - we simply return the answer with the worst performance as `fallback`:
 ```typescript
 // Fallback. Create array map with performance data for each providers from original list
     const perfProvidersData = providers.map(
@@ -299,12 +299,14 @@ function onRequest(req: IRequest, res: IResponse) {
     return;
 }
 ```
-## Case 2: Performance with Penalty and Availability. <a name="case2"></a>
+## Case 2: The Performance with Penalty and Availability. <a name="case2"></a>
 The case: we need to select the answer with the best provider performance and uptime(availability) bigger than 97 percents. 
 
 We also want to apply penalty for the particular provider performance, making it bigger...
 
-**Why?** It may happen that one of our CDN Providers has stable better performance statistics than others and thus always will be the only one selected, so all our 'balancing' with the single provider will make no sense. So we are going to apply 'penalty' - let's call it `padding` and worsen the performance results with the purpose to have answers balanced.
+**Why?**
+
+Well, it might happen that one of our CDN Providers has stable better performance statistics than others and thus always will be the only one selected, so all our 'balancing' with the single provider will make no sense. So we are going to apply 'penalty' - let's call it `padding` and worsen the performance results with the purpose to have our answers balanced.
 
 If all providers have 'low' availability - we will use the `default` provider.  
 
@@ -342,9 +344,9 @@ const configuration = {
     availabilityThreshold: 97,
 };
 ```
-Notice that we have that `padding` property. It can also be negative number and in that case works as `bonus` to performance. 
+Notice that we have added `padding` property. It can also be negative number and in that case it works as `bonus` to a provider performance. 
 
-Now, add our functions (the same we used in the previous script):
+Now, add our functions (the same we have used in the previous case):
 ```typescript
 /**
  * Returns index of lowest number in array
@@ -381,7 +383,7 @@ Now we get all CDN performances and apply penalties:
         })
     );
 ```
-If we have CDN providers with required availability- we choose one with the best performance:
+If we have non-empty list of the CDN providers with required availability - we choose the provider with the best performance:
 ```typescript
     // If we have a providers to choose from - choose one with the best performance
     if (providersPerformance.length) {
@@ -391,7 +393,7 @@ If we have CDN providers with required availability- we choose one with the best
         return;
     }
 ```
-If no providers with desired uptime - just use the `default` one:
+If no providers with the desired uptime - we just use the `default` one:
 ```typescript
     // No available providers - return default
     decision = providers.find(provider => provider.name === defaultProvider);
@@ -483,3 +485,4 @@ function onRequest(req: IRequest, res: IResponse) {
     return;
 }
 ```
+## To be continued...
