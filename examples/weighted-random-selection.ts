@@ -1,8 +1,8 @@
 ///<reference path="../docs/definitions.d.ts"/>
-// Weighted Round Robin
+// Weighted Random Usage
 // Main configuration
 const configuration = {
-    /** List of  providers configuration */
+    /** List of providers configuration */
     providers: [
         {
             name: ('jsdelivr-cdn' as TCDNProvider),// CDN Provider alias to work with
@@ -20,36 +20,36 @@ const configuration = {
             weight: 20
         }
     ],
-    defaultTtl: 20, // The DNS TTL to be applied to DNS responses in seconds.
-    availabilityThreshold: 90 // Board value for providers 'Uptime' to compare with
+    defaultTtl: 20, // The DNS TTL to be applied to the DNS responses in seconds.
+    availabilityThreshold: 90 // The Board value for the providers 'Uptime' to compare with
 };
 
 /**
- * Pick highest value in array of numbers
+ * Picks the highest value in an array of numbers
  */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
 /**
- * Pick object item with highest value of property from array of items
+ * Picks object item with the highest property value from an array of items
  */
 const getHighestByProperty = <T>(array: T[], property):T => array[getHighest(array.map(item => item[property]))];
 /**
- * Calculates Sum of property value for each object in array
+ * Calculates SUM of property values for all objects in an array
  */
 const getSumByProperty = <T>(items:T[], property): number => items.reduce((sum, item) => sum += item[property],0);
 
 function onRequest(req: IRequest, res: IResponse) {
     const {providers, defaultTtl, availabilityThreshold} = configuration;
 
-    // Choose providers that have 'UPTIME' value more that threshold.
+    // Choose providers that have 'UPTIME' value more than the default threshold
     const availableProviders = providers.filter(
         (provider) => fetchCdnRumUptime(provider.name) > availabilityThreshold
     );
-    // Calculate total weight for all providers
+    // Calculate the total weight for available providers
     const totalWeight = getSumByProperty(availableProviders, 'weight');
 
-    // If providers list result after filter is empty or total weight less or equal to 0 go with fallback option
+    // If the filtered providers list is empty or total weight is less or equal to 0 - go with fallback option
     if (availableProviders.length === 0 || totalWeight <= 0) {
-        // Create array map with 'uptime' value for each provider
+        // Create the map with 'uptime' value for each provider
         const CDNUptimeData = providers.map(
             // uptime data for 10 minutes
             (provider) => ({
@@ -57,18 +57,19 @@ function onRequest(req: IRequest, res: IResponse) {
                 uptime: fetchCdnRumUptime(provider.name)
             })
         );
-        // Return Object with default ttl and take providers from array with highest uptime' value
+        // Set the response TTL to the default TTL, select the provider with the best uptime value
+        // and set the response Address to the cname associated with that provider
         res.setAddr(getHighestByProperty(CDNUptimeData, 'uptime').provider.cname);
         res.setTTL(defaultTtl);
         return;
     }
-    // If we have single available result simply return it
+    // If we have single available provider simply set the defaultTTL and cname of that provider as Addr
     if (availableProviders.length === 1) {
         res.setAddr(availableProviders[0].cname);
         res.setTTL(defaultTtl);
         return;
     }
-    // If we have bunch of available result pick one randomly weighted
+    // If we have a bunch of available results - we pick a result using weighted random
     const random = Math.floor(Math.random() * totalWeight);
     let mark = 0;
     let weightedProviderIndex = 0;
@@ -79,7 +80,7 @@ function onRequest(req: IRequest, res: IResponse) {
             break;
         }
     }
-    // Return Object with default ttl and chosen provider
+    // Set the response TTL to the default TTL, and Addr to the cname associated with the chosen provider
     res.setAddr(availableProviders[weightedProviderIndex].cname);
     res.setTTL(defaultTtl);
     return;
