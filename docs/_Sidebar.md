@@ -10,9 +10,9 @@
 * [Functions](Custom-Answers-API#functions)
 
 [[Advanced Use Cases:|Advanced-Use-Cases]]
-* [Case 1: The Optimal Round Trip Time with The Sonar Availability.](Advanced-Use-Cases#case1)
-* [Case 2: The Performance with Penalty and Availability.](Advanced-Use-Cases#case2)
-* [Case 3: The Weighted Random Selection.](Advanced-Use-Cases#case3)
-* [Case 4: Multi Geo-Random with Monitor Overrides.](Advanced-Use-Cases#case4)
+* [[Case 1: The Optimal Round Trip Time with The Sonar Availability.|Case-1]]
+* [[Case 2: The Performance with Penalty and Availability.|Case-2]]
+* [[Case 3: The Weighted Random Selection.|Case-3]]
+* [[Case 4: Multi Geo-Random with Monitor Overrides.|Case-4]]
 
 [[Set up VSCode|Setting-up-VSCode]]
