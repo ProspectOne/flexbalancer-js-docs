@@ -51,7 +51,7 @@ function onRequest(req: IRequest, res: IResponse) {
     if (availableProviders.length === 0 || totalWeight <= 0) {
         // Create the map with 'uptime' value for each provider
         const CDNUptimeData = providers.map(
-            // uptime data for 10 minutes
+            // uptime data for the last hour
             (provider) => ({
                 provider,
                 uptime: fetchCdnRumUptime(provider.name)

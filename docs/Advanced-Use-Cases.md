@@ -4,6 +4,7 @@
     * [Case 1: The Optimal Round Trip Time with The Sonar Availability.](#case1)
     * [Case 2: The Performance with Penalty and Availability.](#case2)
     * [Case 3: The Weighted Random Selection.](#case3)
+    * [Case 4: Multi Geo-Random with Monitor Overrides.](#case4)
 
 # Basic Structure <a name="basic-structure"></a>
 In fact, a Custom Answer Configuration structure does not have any strict rules. Below, we just describe the *recommended* structure, that, in our opinion, is the best one for a Custom Answer Script. So feel free to use your own approach, experiment and invent.
@@ -108,10 +109,10 @@ As we have mentioned, feel free to implement your own structure and solutions. T
 The Case: we have the bunch of answers, that are inspected by our previously created [Monitors](https://panel.perfops.net). 
 We need to get answer that has:
 * Corresponding Monitor online, 
-* CDN provider availability higher than 90%
-* The best CDN provider performance. 
+* CDN provider availability for the last hour higher than 90%
+* The best CDN provider performance for the last hour. 
 
-In case of all monitors are down it should simply return a random answer. And if all CDN uptimes are 'poor' it should fall back with the answer that has the highest provider uptime.
+In case of all monitors are down it should simply return a random answer. And if all CDN uptimes are 'poor' it should fall back with the answer that has the highest provider uptime (we will use our [fetchCDN-functions](Custom-Answers-API#fetchcdnrumuptime)). 
 
 Let's create our `configuration` object:
 ```typescript
@@ -159,7 +160,7 @@ const getLowest = (array: number[]): number => array.indexOf(Math.min(...array))
  */
 const getLowestByProperty = <T>(array: T[], property):T => array[getLowest(array.map(item => item[property]))];
 ```
-Let's parse the configuration and get all providers that have monitors online:
+Let's parse the configuration and get all providers that have monitors online, we will use our `isMonitorOnline` function (more info at [Custom Answers API](Custom-Answers-API#ismonitoronline)):
 ```typescript
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     // Filter providers by monitor - check if the monitor is 'UP'
@@ -176,14 +177,14 @@ Well... bad thing happened and all our monitors are down. We can't determine the
         return;
     }
 ```
-If everything is fine and we have providers with working monitors - let's keep only those CDN providers that have availability more than 90 percent:
+If everything is fine and we have providers with working monitors - let's keep only those CDN providers that have availability more than 90 percent for the last hour:
 ```typescript
     // Filter the previously obtained result. Choose providers that have 'UPTIME' value more that threshold.
     const availableFilteredProviders = monitorFilteredProviders.filter(
         (provider) => fetchCdnRumUptime(provider.name) > availabilityThreshold
     );
 ```
-Everything is perfect, we have the list of CDN providers with good uptime, let's analyze their performance data and return the one with the lowest performance value as the answer. Remember - [the lower 'performance' value - the better](https://www.cdnperf.com/) - it represents value based on response time, so yes- we need the lowest one.
+Everything is perfect, we have the list of CDN providers with good uptime, let's analyze their performance data and return the one with the lowest performance value for the last hour as the answer. Remember - [the lower 'performance' value - the better](https://www.cdnperf.com/) - it represents value based on response time, so yes- we need the lowest one.
 ```typescript
     // If the filtered results list is not empty
     if (availableFilteredProviders.length) {
@@ -307,7 +308,7 @@ function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 ## Case 2: The Performance with Penalty and Availability. <a name="case2"></a>
-The case: we need to select the answer with the best provider performance and uptime(availability) bigger than 97 percents. 
+The case: we need to select the answer with the best provider performance and uptime(availability) bigger than 97 percents (both for the last hour, as it is provided by `fetchCdnRumUptime` and `fetchCdnRumPerformance` [functions](Custom-Answers-API#fetchcdnrumuptime)). 
 
 We also want to apply penalty for the particular provider performance, making it bigger...
 
@@ -315,7 +316,7 @@ We also want to apply penalty for the particular provider performance, making it
 
 Well, it might happen that one of our CDN Providers has stable better performance statistics than others and thus always will be the only one selected, so all our 'balancing' with the single provider will make no sense. So we are going to apply 'penalty' - let's call it `padding` and worsen the performance results with the purpose to have our answers balanced.
 
-If all providers have 'low' availability - we will use the `default` provider.  
+If all providers have 'low' availability for the last hour - we will use the `default` provider.  
 
 First - our `configuration`:
 ```typescript
@@ -387,9 +388,9 @@ Let's use our `req` (Request) to determine the country user came from - it provi
         ...
     };
 ```
-You can get more information regarding our `Request` at [[Custom Answers API|Custom-Answers-API]].
+You can get more information regarding our `Request` at [Custom Answers API](Custom-Answers-API#interfaces).
 
-In case the country is not determined we will use the global (world) CDN provider performance.
+In case the country is not determined we will use the global (world) CDN provider performance for the last hour.
 
 Now, let's get all CDN performances and apply the penalties. 
 ```typescript
@@ -490,7 +491,7 @@ function onRequest(req: IRequest, res: IResponse) {
         })
     );
 
-    // If we have a providers to choose from - choose the one with the best performance
+    // If we have a providers to choose from - choose the one with the best performance for the last hour
     if (providersPerformance.length) {
         decision = getLowestByProperty(providersPerformance, 'performance').provider;
         res.setAddr(decision.cname);
@@ -508,7 +509,7 @@ function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 ## Case 3: The Weighted Random Selection. <a name="case3"></a>
-In this example we will add 'weight' properties to our providers. We will also have the availability threshold and if all providers uptimes are less or equal to that (or only one provider 'passes' test) - will simply return the answer based on 'cname' related to the provider with the best uptime. And if we have more than one provider with required availability - we will choose the answer based on the weighted random selection that will use our new 'weight' property.
+In this example we will add 'weight' properties to our providers. We will also have the availability threshold and if all providers uptimes are less or equal to that (or only one provider 'passes' test) - will simply return the answer based on 'cname' related to the provider with the best uptime for the last hour. And if we have more than one provider with required availability - we will choose the answer based on the weighted random selection that will use our new 'weight' property. We will use our [fetchCDN-functions](Custom-Answers-API#fetchcdnrumuptime) to get CDNs uptimes and performances.
 
 Our `configuration` goes first:
 ```typescript
@@ -567,13 +568,13 @@ Then let's calculate the weight SUM of that 'available' providers from the list,
     // Calculate the total weight for available providers
     const totalWeight = getSumByProperty(availableProviders, 'weight');
 ```
-If all providers have 'bad' uptime, or the Sum of `available` providers = 0 - we will return the answer based on provider with the best uptime:
+If all providers have 'bad' uptime, or the Sum of `available` providers = 0 - we will return the answer based on provider with the best uptime for the last hour:
 ```typescript
     // If the filtered providers list is empty or total weight is less or equal to 0 - go with fallback option
     if (availableProviders.length === 0 || totalWeight <= 0) {
         // Create the map with 'uptime' value for each provider
         const CDNUptimeData = providers.map(
-            // uptime data for 10 minutes
+            // uptime data for the last hour
             (provider) => ({
                 provider,
                 uptime: fetchCdnRumUptime(provider.name)
@@ -700,5 +701,194 @@ function onRequest(req: IRequest, res: IResponse) {
     res.setTTL(defaultTtl);
     return;
 }
-``` 
+```
+
+## Case 4: Multi Geo-Random with Monitor Overrides <a name="case4"></a>
+This one is the 'full' version of the script that we used in our [Tutorial](Tutorial#countrieswithrandom). 
+
+The goal is:
+* to define specific answers (and even answer sets) for particular countries
+* to provide random selection logic in case if there is more than one answer candidate for the country 
+* to implement boolean property `requireMonitorData` that validates only answers with Monitors online (if set to `true`)
+
+If country is not in our list - we will use a random answer from our list. In this case, if Monitors validation is 'on' and there are no answers with Monitors online at all - we should fall back.
+
+Yes, it may sound complicated, but in fact it's not that bad. Our `configuration` section goes first: 
+```typescript
+const configuration = {
+    providers: [
+        {
+            name: 'foo', // candidate name
+            cname: 'www.foo.com', // cname to pick as a result for the response Addr
+            monitor: (304 as TMonitor) // Monitor ID that is created by user to monitor hostname
+        },
+        {
+            name: 'bar',
+            cname: 'www.bar.com',
+            monitor: (305 as TMonitor)
+        },
+        {
+            name: 'baz',
+            cname: 'www.baz.com'
+        }
+    ],
+    countriesAnswersSets: {
+        'PL': ['bar', 'baz'],
+        'JP': ['foo']
+    },
+    defaultTtl: 20,
+    requireMonitorData: false // in this case answer monitor being online is not required
+};
+```
+We have defined three answer providers, created sets for two countries (Poland and Japan), at `countriesAnswersSets` assigned two of our answer candidate 'names' to Poland and one - to Japan. We have added that mentioned above boolean property `requireMonitorData` and set it to 'false' for our example. 
+
+Now we add one our 'common' function for random element:
+```typescript
+/**
+ * Picks random item from array of items
+ */
+const getRandomElement = <T>(items: T[]): T => {
+    return items[Math.floor(Math.random() * items.length)];
+};
+```
+And we also create function that validates answer candidate. It returns either answer Monitor online status (if `requireMonitorData` is set to `true`) or just `true` if we don't care about Monitors statuses:
+```typescript
+/**
+ * If monitor is set for candidate - returns its availability, else returns true if monitor is not required
+ */
+const isProperCandidate = (candidate, requireMonitorData) => {
+    if (candidate.monitor) {
+        return isMonitorOnline(candidate.monitor)
+    }
+    return !requireMonitorData;
+};
+```
+Now let's implement our logic inside `onResponse` (Main) function.
+
+First, we parse our `configuration` and try to determine the user country:
+```typescript
+    const {countriesAnswersSets, providers, defaultTtl, requireMonitorData} = configuration;
+
+    // Country where request was made from
+    let requestCountry = req.location.country as TCountry;
+```
+Now we check if we were able to get the country, and if it is one of the countries from our list (Poland or Japan) - check if there is answers set for it and if the answer candidates are valid. In our particular example all of them are valid, because `requireMonitorData` is set to `false`. But if you enable it - it won't validate any candidates with Monitors `offline`.
+```typescript
+    // Checking if we were able to detect country, and if our country is listed in countriesAnswersSets list
+    if (requestCountry && countriesAnswersSets[requestCountry]) {
+        // Choose candidates that are listed in countriesAnswersSets and are proper candidates
+        let geoFilteredCandidates = providers.filter(
+            (provider) => countriesAnswersSets[requestCountry].includes(provider.name)
+                && isProperCandidate(provider, requireMonitorData)
+        );
+```
+If we get the user from Poland or Japan and the validation of the candidate(candidates) for that country has passed - we randomly pick the answer from the country answers set and use its `cname` for Response Address:
+```typescript
+        // If we found proper geo candidates, pick one of them randomly and use cname for the answer
+        if (geoFilteredCandidates.length) {
+            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setTTL(defaultTtl);
+            return;
+        }
+```  
+If the user is from any other country, or country is 'unknown' - we pick random candidate and use its `cname` for Response. If `requireMonitorData` is set to `true` - we pick the candidate only from those with Monitors online.
+```typescript
+    //If there was no geo candidates, we choose new ones from whole list by monitor filter
+    const properCandidates = providers.filter(item => isProperCandidate(item, requireMonitorData));
+
+    //Choose random candidate cname as response Addr (if we have any)
+    if (properCandidates.length) {
+        res.setAddr(getRandomElement(properCandidates).cname);
+        res.setTTL(defaultTtl);
+        return;
+    }
+```
+In case all monitors are offline - we use the `fallback`:
+```typescript
+    // If not - set fallback 
+    res.setAddr('our.fallback.com');
+    res.setTTL(defaultTtl);
+    return;
+```
+Here we go! **And here is our script:**
+```typescript
+const configuration = {
+    providers: [
+        {
+            name: 'foo', // candidate name
+            cname: 'www.foo.com', // cname to pick as a result for the response Addr
+            monitor: (304 as TMonitor) // Monitor ID that is created by user to monitor hostname
+        },
+        {
+            name: 'bar',
+            cname: 'www.bar.com',
+            monitor: (305 as TMonitor)
+        },
+        {
+            name: 'baz',
+            cname: 'www.baz.com'
+        }
+    ],
+    countriesAnswersSets: {
+        'PL': ['bar', 'baz'],
+        'JP': ['foo']
+    },
+    defaultTtl: 20,
+    requireMonitorData: false // in this case answer monitor being online is not required
+};
+
+/**
+ * Picks random item from array of items
+ */
+const getRandomElement = <T>(items: T[]): T => {
+    return items[Math.floor(Math.random() * items.length)];
+};
+
+/**
+ * If monitor is set for candidate - returns its availability, else returns true if monitor is not required
+ */
+const isProperCandidate = (candidate, requireMonitorData) => {
+    if (candidate.monitor) {
+        return isMonitorOnline(candidate.monitor)
+    }
+    return !requireMonitorData;
+};
+
+function onRequest(req: IRequest, res: IResponse) {
+    const {countriesAnswersSets, providers, defaultTtl, requireMonitorData} = configuration;
+
+    // Country where request was made from
+    let requestCountry = req.location.country as TCountry;
+
+    // Checking if we were able to detect country, and if our country is listed in countriesAnswersSets list
+    if (requestCountry && countriesAnswersSets[requestCountry]) {
+        // Choose candidates that are listed in countriesAnswersSets and are proper candidates
+        let geoFilteredCandidates = providers.filter(
+            (provider) => countriesAnswersSets[requestCountry].includes(provider.name)
+                && isProperCandidate(provider, requireMonitorData)
+        );
+        // If we found proper geo candidates, pick one of them randomly and use cname for the answer
+        if (geoFilteredCandidates.length) {
+            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setTTL(defaultTtl);
+            return;
+        }
+    }
+
+    //If there was no geo candidates, we choose new ones from whole list by monitor filter
+    const properCandidates = providers.filter(item => isProperCandidate(item, requireMonitorData));
+
+    //Choose random candidate cname as response Addr (if we have any)
+    if (properCandidates.length) {
+        res.setAddr(getRandomElement(properCandidates).cname);
+        res.setTTL(defaultTtl);
+        return;
+    }
+    // If not - set fallback 
+    res.setAddr('our.fallback.com');
+    res.setTTL(defaultTtl);
+    return;
+}
+```
+
 ## More Advanced Use Cases coming soon!

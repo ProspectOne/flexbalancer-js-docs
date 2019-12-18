@@ -219,7 +219,7 @@ declare type TLocationSelectorContinent = 'continent';
 
 * **monitor** - *(TMonitor)* - User Monitor ID.
 
-Returns your monitor uptime value, a monitor id is passed as an argument.
+Returns your monitor uptime value, a monitor id is passed as an argument. **Monitors data is collected every 10 seconds.**
 
 Example:
 
@@ -255,7 +255,9 @@ function onRequest(req: IRequest, res: IResponse) {
 
 * **provider** - *(TCDNProvider)* - the provider alias, described at the `Types` section.
 
-Returns world uptime value for the particular CDN provider. 
+Returns world uptime value for the particular CDN provider.
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
@@ -278,6 +280,8 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns location-based uptime value for the particular CDN provider.
 
+**The data represents the last hour and is collected every minute.**
+
 Example:
 
 ```typescript
@@ -294,6 +298,8 @@ function onRequest(req: IRequest, res: IResponse) {
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 
 Similar to the previous function but returns World RUM Performance value.
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
@@ -314,7 +320,9 @@ This function also accepts additional parameters `selector` and `identifier`:
 * **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
 * **identifier** - *(TContinent | TCountry | TState)* - location ISO, described at `Types` section.
 
-Returns the location-based performance value. 
+Returns the location-based CDN performance value.
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
