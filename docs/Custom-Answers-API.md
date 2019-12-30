@@ -1,6 +1,6 @@
 # FlexBalancer Custom Answers API
 1. [Application](#application)
-    * [The Main function (onRequest)](#main-function)
+    * [The Main function (onRequest)](#the-main-function)
     * [Interfaces](#interfaces)
 2. [Provided functions](#provided-functions)
     * [Types](#types)

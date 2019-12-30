@@ -1,4 +1,4 @@
-## Case 4: Multi Geo-Random with Monitor Overrides <a name="case4"></a>
+## Solution 4: Multi Geo-Random with Monitor Overrides <a name="case4"></a>
 This one is the 'full' version of the script that we used in our [Tutorial](Tutorial#countrieswithrandom). 
 
 The goal is:

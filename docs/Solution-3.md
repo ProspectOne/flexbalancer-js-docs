@@ -1,4 +1,4 @@
-## Case 3: The Weighted Random Selection. <a name="case3"></a>
+## Solution 3: The Weighted Random Selection. <a name="case3"></a>
 In this example we will add 'weight' properties to our providers. We will also have the availability threshold and if all providers uptimes are less or equal to that (or only one provider 'passes' test) - will simply return the answer based on 'cname' related to the provider with the best uptime for the last hour. And if we have more than one provider with required availability - we will choose the answer based on the weighted random selection that will use our new 'weight' property. We will use our [fetchCDN-functions](Custom-Answers-API#fetchcdnrumuptime) to get CDNs uptimes and performances.
 
 Our `configuration` goes first:

@@ -1,4 +1,4 @@
-## Case 2: The Performance with Penalty and Availability. <a name="case2"></a>
+## Solution 2: The Performance with Penalty and Availability. <a name="case2"></a>
 The case: we need to select the answer with the best provider performance and uptime(availability) bigger than 97 percents (both for the last hour, as it is provided by `fetchCdnRumUptime` and `fetchCdnRumPerformance` [functions](Custom-Answers-API#fetchcdnrumuptime)). 
 
 We also want to apply penalty for the particular provider performance, making it bigger...

@@ -1,4 +1,4 @@
-## Case 1: The Optimal Round Trip Time with The Sonar Availability. <a name="case1"></a>
+## Solution 1: The Optimal Round Trip Time with The Monitor Availability. <a name="case1"></a>
 
 The Case: we have the bunch of answers, that are inspected by our previously created [Monitors](https://panel.perfops.net). 
 We need to get answer that has:

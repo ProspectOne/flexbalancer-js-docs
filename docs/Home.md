@@ -15,5 +15,5 @@ With the Custom Code FlexBalancer feature you are able to write your own javascr
 * [[Use all benefits of Custom Answers API|Custom-Answers-API]]
 * [[Set up IDE text editor (VSCode)|Setting-up-VSCode]]
 * [[Advanced Use Cases|Advanced-Use-Cases]]
-
+* [[Migration Solutions|Migration-Solutions]]
 
