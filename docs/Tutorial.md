@@ -608,7 +608,7 @@ Works great!
 
 ## Lesson 9: Countries based answers with random selection. <a name="countrieswithrandom"></a>
 
-Now, let's create more complicated answer. This is modified and simplified (with Monitors removed) version of one of our sample scripts (also available at our repository).
+Now, let's create more complicated answer. This is modified and simplified (with Monitors removed) version of one of our sample scripts (also available at our repository). In this script we will use the recommended script structure, described at [Basic Structure.](Advanced-Use-Cases#basic-structure). You will see this structure if you take a look at our [Advanced Use Cases](Advanced-Use-Cases#basic-structure) or [Migration Solutions](Migration-Solutions) sections.  
 
 The goal is to have two possible answers (candidates) for each country from our list and randomly select one of them if user country matches with any country from our list (we use the same countries: France, the US and Ukraine). And if no matches - return default `answer.othercountries.net` addr.
 

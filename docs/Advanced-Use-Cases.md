@@ -1,5 +1,6 @@
 # Advanced Use Cases
 1. [Basic Structure.](#basic-structure)
+2. [Use Cases.](#use-cases)
 
 # Basic Structure <a name="basic-structure"></a>
 In fact, a Custom Answer Configuration structure does not have any strict rules. Below, we just describe the *recommended* structure, that, in our opinion, is the best one for a Custom Answer Script. So feel free to use your own approach, experiment and invent.
@@ -98,4 +99,13 @@ function onRequest(req: IRequest, res: IResponse) {
 ``` 
 As we have mentioned, feel free to implement your own structure and solutions. The only **the must** is  `onRequest(req: IRequest, res: IResponse)` (Main function) usage.
 
-## Advanced Use Cases coming soon!
+# Use Cases <a name="use-cases"></a>
+## Case 1.1: Provider Availability with Weights. <a name="case1.1"></a>
+**The Case**: A customer uses 2+ CDN providers. A user is directed to the CDN that is available at a given point in time. If both CDNs are available the decision is based on weight. [Go to the Use Case](Case-1.1)
+## Case 1.2: Availability based on Monitor Uptime. <a name="case1.2"></a>
+**The Case**: A customer uses 2+ nodes, monitored by [PerfOps Monitoring Feature](https://panel.perfops.net/monitors). A user is directed to the node that has the best Monitor Uptime at a given point in time. If both Monitors are down returns random answer. [Go to the Use Case](Case-1.2)
+## Case 2.1: Balancing based on the CDN with the better Performance <a name="case2.1"></a>
+The Case: A customer uses 2+ CDN providers. Their user is simply balanced to the better performing one. [Go to the Use Case](Case-2.1)
+## Case 3.1: Geolocation with excluded country <a name="case3.1"></a>
+The Case: User has different providers for 2 regions - using 1 CDN for the USA and another CDN for the rest of the world. [Go to the Use Case](Case-3.1)
+## More Advanced Use Cases coming soon!
