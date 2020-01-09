@@ -14,6 +14,7 @@
 * [[Case 1.2: Availability based on Monitor Uptime.|Case-1.2]]
 * [[Case 2.1: Balancing based on the CDN with the better Performance.|Case-2.1]]
 * [[Case 3.1: Geolocation with excluded country.|Case-3.1]]
+* [[Case 3.2: The specific answer for the specific region.|Case-3.2]]
 
 [[Migration Solutions:|Migration-Solutions]]
 
