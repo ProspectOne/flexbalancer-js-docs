@@ -4,14 +4,22 @@
 
 [[Tutorial|Tutorial]]
 
-[[Custom Answers API|Custom-Answers-API]]
+[[Custom Answers API:|Custom-Answers-API]]
 * [Interfaces](Custom-Answers-API#interfaces)
 * [Types](Custom-Answers-API#types)
 * [Functions](Custom-Answers-API#functions)
 
 [[Advanced Use Cases:|Advanced-Use-Cases]]
-* [Case 1: The Optimal Round Trip Time with The Sonar Availability.](Advanced-Use-Cases#case1)
-* [Case 2: The Performance with Penalty and Availability.](Advanced-Use-Cases#case2)
-* [Case 3: The Weighted Random Selection.](Advanced-Use-Cases#case3)
+* [[Case 1.1: Provider Availability with Weights.|Case-1.1]]
+* [[Case 1.2: Availability based on Monitor Uptime.|Case-1.2]]
+* [[Case 2.1: Balancing based on the CDN with the better Performance.|Case-2.1]]
+* [[Case 3.1: Geolocation with excluded country.|Case-3.1]]
+
+[[Migration Solutions:|Migration-Solutions]]
+
+* [[Solution 1: The Optimal Round Trip Time with The Monitor Availability.|Solution-1]]
+* [[Solution 2: The Performance with Penalty and Availability.|Solution-2]]
+* [[Solution 3: The Weighted Random Selection.|Solution-3]]
+* [[Solution 4: Multi Geo-Random with Monitor Overrides.|Solution-4]]
 
 [[Set up VSCode|Setting-up-VSCode]]

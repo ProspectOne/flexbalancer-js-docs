@@ -40,7 +40,7 @@ const ipTo = '134.249.250.0';
 
 Let's presume that our current ip is at that range, so it should be processed by custom answer. You can use your own IP with own range, just be sure that your IP is in that range.
 
-So let's edit our 'onRequest' logic. We will use our predefined **isIpInRange(ip: TIp, startIp: TIp, endIp: TIp):boolean** function: 
+So let's edit our 'onRequest' logic. We will use our predefined **isIpInRange(ip: TIp, startIp: TIp, endIp: TIp):boolean** function, you can find out more about it at [Custom Answers API](Custom-Answers-API#isipinrange): 
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
@@ -114,7 +114,7 @@ lookupCity(ip: string) // We won't need this now. And in most cases we have that
 ...
 lookupCity(ip: string, target: number, threshold: number) // This is one we need
 ```
-You can find out more information in our documentation [[Custom Answers API|Custom-Answers-API]]
+You can find out more information in our documentation [Custom Answers API](Custom-Answers-API#lookupcity)
 
 First let's define the city and the answers:
 ```typescript
@@ -162,7 +162,7 @@ testcustom.0b62ec.flexbalancer.net. 10 IN CNAME amsterdam.myanswer.net.
 
 ## Lesson 3: The ASN Lookup usage. <a name="asnbased">
 
-Another `lookup` function that we provide is `lookupAsn`, that returns info regarding the [Autonomous System Number](#https://en.wikipedia.org/wiki/Autonomous_system_(Internet)) of the IP provided:
+Another `lookup` function that we provide is `lookupAsn` (more info at [Custom Answers API](Custom-Answers-API#lookupasn)), that returns info regarding the [Autonomous System Number](#https://en.wikipedia.org/wiki/Autonomous_system_(Internet)) of the IP provided:
 ```typescript
 declare interface IAsnResponse {
     readonly autonomousSystemNumber: number;
@@ -208,7 +208,7 @@ Great, we've done it.
 
 Let's imagine that you have two answers hosted on two different CDN providers: `jsdelivr.myanswer.net` and `googlecloud.myanswer.net`.
 
-[CDNPerf](#https://www.cdnperf.com/) provides the CDN Uptime value, based on the RUM (Real User Metrics) data from users all over the world. You want to check that Uptimes and return answer from CDN with better uptime. And if uptimes are equal - return random answer. 
+[CDNPerf](#https://www.cdnperf.com/) provides the CDN Uptime value, based on the RUM (Real User Metrics) data from users all over the world. You want to check that Uptimes for the last hour and return answer from CDN with better uptime. And if uptimes are equal - return random answer. 
 
 First, let make an array of our answers:
 ```typescript
@@ -217,7 +217,7 @@ const answers = [
     'googlecloud.myanswer.net'
 ];
 ```
-Then, get the CDN Uptime values, using `fetchCdnRumUptime` function, provided by our [[Custom Answers API|Custom-Answers-API]]:
+Then, get the CDN Uptime values, using `fetchCdnRumUptime` function, provided by our [Custom Answers API](Custom-Answers-API#fetchcdnrumuptime) (it returns CDN provider uptime for the last hour):
 ```typescript
     // get Uptime values
     const jsDelivrUp = fetchCdnRumUptime('jsdelivr-cdn');
@@ -284,7 +284,7 @@ depending on the best CDN uptime.
 
 [CDNPerf](#https://www.cdnperf.com/) also provides the CDN Performance value, also based on the Real User Metrics data collected from users all over the world. So you can use that performance as the criteria.
 
-The code is very similar to the previous one - let's just focus on differences. [[Custom Answers API|Custom-Answers-API]] provides `fetchCdnRumPerformance` function, all we need is to modify the code of the previous lesson:
+The code is very similar to the previous one - let's just focus on differences. [Custom Answers API](Custom-Answers-API#fetchcdnrumperformance) provides `fetchCdnRumPerformance` function (that returns CDN provider performance for the last hour), all we need is to modify the code of the previous lesson:
 
 ```typescript
     // get Performance values
@@ -360,7 +360,7 @@ Notice, that the Monitor IDs must be of `TMonitor` type:
 ```typescript
 declare type TMonitor = 593 | 594; // your monitor IDs
 ```
-And we are going to use our *fetchMonitorUptime(monitor: TMonitor)* and *isMonitorOnline(monitor: TMonitor)* functions, described at [[Custom Answers API|Custom-Answers-API]].
+And we are going to use our *fetchMonitorUptime(monitor: TMonitor)* and *isMonitorOnline(monitor: TMonitor)* functions, described at [Custom Answers API](Custom-Answers-API#fetchmonitoruptime).
 
 Now, let's write our script. First, we check if our monitors are online:
 ```typescript
@@ -608,7 +608,7 @@ Works great!
 
 ## Lesson 9: Countries based answers with random selection. <a name="countrieswithrandom"></a>
 
-Now, let's create more complicated answer. This is modified and simplified (with Monitors removed) version of one of our sample scripts (also available at our repository).
+Now, let's create more complicated answer. This is modified and simplified (with Monitors removed) version of one of our sample scripts (also available at our repository). In this script we will use the recommended script structure, described at [Basic Structure.](Advanced-Use-Cases#basic-structure). You will see this structure if you take a look at our [Advanced Use Cases](Advanced-Use-Cases#basic-structure) or [Migration Solutions](Migration-Solutions) sections.  
 
 The goal is to have two possible answers (candidates) for each country from our list and randomly select one of them if user country matches with any country from our list (we use the same countries: France, the US and Ukraine). And if no matches - return default `answer.othercountries.net` addr.
 
