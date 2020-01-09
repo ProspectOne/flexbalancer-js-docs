@@ -1,8 +1,8 @@
-# Advanced Use Cases
-1. [Basic Structure.](#basic-structure)
+# Basic Use Cases
+1. [Main Structure.](#basic-structure)
 2. [Use Cases.](#use-cases)
 
-# Basic Structure <a name="basic-structure"></a>
+# Main Structure <a name="basic-structure"></a>
 In fact, a Custom Answer Configuration structure does not have any strict rules. Below, we just describe the *recommended* structure, that, in our opinion, is the best one for a Custom Answer Script. So feel free to use your own approach, experiment and invent.
 
 A typical Custom Answer has three 'sections':
@@ -105,7 +105,9 @@ As we have mentioned, feel free to implement your own structure and solutions. T
 ## Case 1.2: Availability based on Monitor Uptime. <a name="case1.2"></a>
 **The Case**: A customer uses 2+ nodes, monitored by [PerfOps Monitoring Feature](https://panel.perfops.net/monitors). A user is directed to the node that has the best Monitor Uptime at a given point in time. If both Monitors are down returns random answer. [Go to the Use Case](Case-1.2)
 ## Case 2.1: Balancing based on the CDN with the better Performance <a name="case2.1"></a>
-The Case: A customer uses 2+ CDN providers. Their user is simply balanced to the better performing one. [Go to the Use Case](Case-2.1)
+**The Case**: A customer uses 2+ CDN providers. Their user is simply balanced to the better performing one. [Go to the Use Case](Case-2.1)
 ## Case 3.1: Geolocation with excluded country <a name="case3.1"></a>
-The Case: User has different providers for 2 regions - using 1 CDN for the USA and another CDN for the rest of the world. [Go to the Use Case](Case-3.1)
-## More Advanced Use Cases coming soon!
+**The Case**: User has different providers for 2 regions - using 1 CDN for the USA and another CDN for the rest of the world. [Go to the Use Case](Case-3.1)
+## Case 3.2: The specific answer for the specific region <a name="case3.2"></a>
+**The Case**: User has different CDN provider for each continent, we need to set corresponding answer or fallback if continent is not determined. [Go to the Use Case](Case-3.2)
+## More Use Cases coming soon!

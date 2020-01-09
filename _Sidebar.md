@@ -9,7 +9,7 @@
 * [Types](Custom-Answers-API#types)
 * [Functions](Custom-Answers-API#functions)
 
-[[Advanced Use Cases:|Advanced-Use-Cases]]
+[[Basic Use Cases:|Basic-Use-Cases]]
 * [[Case 1.1: Provider Availability with Weights.|Case-1.1]]
 * [[Case 1.2: Availability based on Monitor Uptime.|Case-1.2]]
 * [[Case 2.1: Balancing based on the CDN with the better Performance.|Case-2.1]]
