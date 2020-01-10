@@ -1,13 +1,11 @@
-Sometimes we face a sitiation when a customer decides to migrate from one to another balancing system and he has a bunch of own scripts. And yes - all those are to be changed to fit a new environment.
-
-We have prepared a couple of real script samples that were rewritten for the PerfOps Custom Answers Environment and also explained those using 'step-by-step tutorial' format to make script logic more clear. We will also use the recommended structure we have described at [Basic Structure](Advanced-Use-Cases#basic-structure) section of [Advanced Use Cases](Advanced-Use-Cases) for the scripts. The cases are quite typical so you might find those useful.
+We have prepared a couple of advanced script samples and explained those using 'step-by-step tutorial' format to make script logic more clear. We also have used the recommended structure we have described at [Main Structure](Basic-Use-Cases#basic-structure) section of [Basic Use Cases](Basic-Use-Cases) for that scripts. The cases are quite typical so you might find those useful.
 
 * [Solution 1: The Optimal Round Trip Time with The Monitor Availability.](Solution-1)
 * [Solution 2: The Performance with Penalty and Availability.](Solution-2)
 * [Solution 3: The Weighted Random Selection.](Solution-3)
 * [Solution 4: Multi Geo-Random with Monitor Overrides.](Solution-4)
 
-# Migration Solutions: <a name="migration-solutions"></a> 
+# Advanced Solutions: <a name="advanced-solutions"></a> 
 ## Solution 1: The Optimal Round Trip Time with The Monitor Availability. <a name="solution1"></a>
 
 The Case: we have the bunch of answers, that are inspected by our previously created [Monitors](https://panel.perfops.net/monitors). 

@@ -15,4 +15,4 @@ With the Custom Code FlexBalancer feature you are able to write your own javascr
 * [Use all benefits of Custom Answers API](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Custom-Answers-API)
 * [Set up IDE text editor (VSCode)](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Setting-up-VSCode)
 * [Basic Use Cases](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Basic-Use-Cases)
-* [Migration Solutions](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Migration-Solutions)
+* [Advanced Solutions](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Advanced-Solutions)

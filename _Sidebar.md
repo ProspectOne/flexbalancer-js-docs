@@ -16,7 +16,7 @@
 * [[Case 3.1: Geolocation with excluded country.|Case-3.1]]
 * [[Case 3.2: The specific answer for the specific region.|Case-3.2]]
 
-[[Migration Solutions:|Migration-Solutions]]
+[[Advanced Solutions:|Advanced-Solutions]]
 
 * [[Solution 1: The Optimal Round Trip Time with The Monitor Availability.|Solution-1]]
 * [[Solution 2: The Performance with Penalty and Availability.|Solution-2]]
