@@ -1,6 +1,6 @@
 # FlexBalancer Custom Answers API
 1. [Application](#application)
-    * [The Main function (onRequest)](#main-function)
+    * [The Main function (onRequest)](#the-main-function)
     * [Interfaces](#interfaces)
 2. [Provided functions](#provided-functions)
     * [Types](#types)
@@ -9,6 +9,8 @@
         * [isMonitorOnline](#ismonitoronline)
         * [fetchCdnRumUptime](#fetchcdnrumuptime)
         * [fetchCdnRumPerformance](#fetchcdnrumperformance)
+        * [fetchCloudProviderUptime](#fetchclouduptime)
+        * [fetchCloudProviderPerformance](#fetchcloudperformance)
         * [lookupCity](#lookupcity)
         * [lookupState](#lookupstate)
         * [lookupCountry](#lookupcountry)
@@ -174,6 +176,31 @@ The aliases for the CDN Providers:
 | cachefly | CacheFly |
 | medianova | Medianova |
 ***
+**TCloudProvider**
+
+This type represents the list of the Cloud providers aliases:
+
+```typescript
+/**
+ * Generated list of Cloud provider IDs
+ */
+declare type TCloudProvider = 'aws:us-east-2' | 'aws:us-east-1' | ... 'digitalocean:nyc' | ... 'vultr:ga-us' | ... 'gce:us-west2';
+```
+The aliases for the Cloud Providers:
+
+| Alias | Cloud Provider |
+|:------|:----------------|
+| aws | Amazon Web Services |
+| digitalocean | DigitalOcean |
+| vultr | Vultr |
+| gce | Google Cloud |
+
+The regions for the particular Cloud Provider are attached after alias name, followed by `:`, for example:
+```typescript
+let cloudPerformance = fetchCloudProviderPerformance('aws:us-east-1');
+```
+The full list of the Cloud Providers with regions is available via Custom Answers Editor ToolTip.
+***
 **TMonitor**
 
 This type is generated based on the list of your monitors IDs. If you don't have any - it is equal to `null`.
@@ -219,7 +246,7 @@ declare type TLocationSelectorContinent = 'continent';
 
 * **monitor** - *(TMonitor)* - User Monitor ID.
 
-Returns your monitor uptime value, a monitor id is passed as an argument.
+Returns your monitor uptime value, a monitor id is passed as an argument. **Monitors data is collected every 10 seconds.**
 
 Example:
 
@@ -255,7 +282,9 @@ function onRequest(req: IRequest, res: IResponse) {
 
 * **provider** - *(TCDNProvider)* - the provider alias, described at the `Types` section.
 
-Returns world uptime value for the particular CDN provider. 
+Returns world uptime value for the particular CDN provider. [The higher value - the better uptime.](https://www.cdnperf.com/#!rum)
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
@@ -276,7 +305,9 @@ This function also accepts additional parameters `selector` and `identifier`:
 * **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
 * **identifier** - *(TContinent | TCountry | TState)* - the location ISO, described at `Types` section.
 
-Returns location-based uptime value for the particular CDN provider.
+Returns location-based uptime value for the particular CDN provider. [The higher value - the better uptime.](https://www.cdnperf.com/#!rum)
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
@@ -293,7 +324,9 @@ function onRequest(req: IRequest, res: IResponse) {
 
 * **provider** - *(TCDNProvider)* - provider alias, described at `Types` section.
 
-Similar to the previous function but returns World RUM Performance value.
+Similar to the previous function but returns World RUM Performance value. [The lower value - the better performance.](https://www.cdnperf.com/)
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
@@ -314,13 +347,103 @@ This function also accepts additional parameters `selector` and `identifier`:
 * **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
 * **identifier** - *(TContinent | TCountry | TState)* - location ISO, described at `Types` section.
 
-Returns the location-based performance value. 
+Returns the location-based CDN performance value. [The lower value - the better performance.](https://www.cdnperf.com/)
+
+**The data represents the last hour and is collected every minute.**
 
 Example:
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     if(fetchCdnRumPerformance('jsdelivr-cdn', 'country', 'FR') < 40) {
+    ...
+    }
+...
+}
+```
+***
+**fetchCloudProviderUptime(provider: TCloudProvider): number | null** <a name="fetchclouduptime"></a>
+
+* **provider** - *(TCloudProvider)* - the provider alias with the region, described at the `Types` section.
+
+Returns world uptime value for the particular Cloud provider. [The higher value - the better uptime.](https://www.cloudperf.com/?s=uptime)
+
+**The data represents the last hour and is collected every minute.**
+
+Example:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    let cloudUptime = fetchCloudProviderUptime('aws:us-east-2');
+    if(cloudUptime && cloudUptime > 90) {
+    ...
+    }
+...
+}
+```
+
+This function also accepts additional parameters `selector` and `identifier`:
+
+**fetchCloudProviderUptime(provider: TCloudProvider, selector?, identifier?): number | null**
+
+* **provider** - *(TCloudProvider)* - the provider alias with the region, described at `Types` section.
+* **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
+* **identifier** - *(TContinent | TCountry | TState)* - the location ISO, described at `Types` section.
+
+Returns location-based uptime value for the particular Cloud provider. [The higher value - the better uptime.](https://www.cloudperf.com/?s=uptime)
+
+**The data represents the last hour and is collected every minute.**
+
+Example:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    let cloudUptime = fetchCloudProviderUptime('aws:us-east-2', 'continent', 'EU');
+    if(cloudUptime && cloudUptime > 99) {
+    ...
+    }
+...
+}
+```
+***
+**fetchCloudProviderPerformance(provider: TCloudProvider): number | null** <a name="fetchcloudperformance"></a>
+
+* **provider** - *(TCloudProvider)* - provider alias with the region, described at `Types` section.
+
+Similar to the previous function but returns the World Performance (Latency) value. [The lower value - the better performance.](https://www.cloudperf.com/)
+
+**The data represents the last hour and is collected every minute.**
+
+Example:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    let cloudPerf = fetchCloudProviderPerformance('aws:us-east-2');
+    if(cloudPerf && cloudPerf < 33) {
+    ...
+    }
+...
+}
+```
+
+This function also accepts additional parameters `selector` and `identifier`:
+
+**fetchCloudProviderPerformance(provider: TCloudProvider, selector?, identifier?): number | null**
+
+* **provider** - *(TCloudProvider)* - the provider alias, described at `Types` section.
+* **selector** - *(TLocationSelectorContinent | TLocationSelectorCountry | TLocationSelectorState)* - selector type, must be the same location type (continent, country or state) as the third param.
+* **identifier** - *(TContinent | TCountry | TState)* - location ISO, described at `Types` section.
+
+Returns the location-based Cloud performance (Latency) value. [The lower value - the better performance.](https://www.cloudperf.com/)
+
+**The data represents the last hour and is collected every minute.**
+
+Example:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    let cloudPerf = fetchCloudProviderPerformance('aws:us-east-2', 'country', 'FR');
+    if(cloudPerf && cloudPerf < 40) {
     ...
     }
 ...
