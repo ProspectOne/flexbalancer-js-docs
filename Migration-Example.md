@@ -1,6 +1,6 @@
 # The Performance-Based Answer with Preferred Market Weights
 ## The Case
-We have a set of answers with CDN providers. Each provider in our set has special `weigth` number for every continent, that determines the location penalties / boosts for that particular provider. For example, we want the users from Europe get preferred (so appear more oftenly) answer from `CDN provider 1`, and users from South America should preferrably get answer from `CDN Provider 2`.
+We have a set of answers with CDN providers. Each provider in our set has special `ratio` number for every continent, that determines the location penalties / boosts for that particular provider. For example, we want the users from Europe get preferred (so appear more oftenly) answer from `CDN provider 1`, and users from South America should preferrably get answer from `CDN Provider 2`.
 
 Here goes the `original` Cedexis Openmix Application script:
 
@@ -307,10 +307,14 @@ function OpenmixApplication(settings) {
 ```
 Quite complicated, isn't it?
 
-Our task is to modify that script using [fetchCdnRumUptime](Custom-Answers-API#fetchcdnrumuptime) and [fetchCdnRumPerformance](Custom-Answers-API#fetchcdnrumperformance) functionalities provided by [PerfOps Custom Answers](Custom-Answers-API), and rewrite it in `typescript`. Let's do it step by step, using our [Recommended Structure](Basic-Use-Cases#basic-structure) rules. Those are not mandatory, but recommended, and you will see the reason why. 
+The important thing to mention is that PerfOps uses quite different from `Openmix getProbe` approach for the performance monitoring. It is based on [Real User Metrics(RUM) data](https://www.cdnperf.com/) collected from users all over the world.
+
+So, our task is to rewrite that script for [fetchCdnRumUptime](Custom-Answers-API#fetchcdnrumuptime) and [fetchCdnRumPerformance](Custom-Answers-API#fetchcdnrumperformance) functionalities provided by [PerfOps Custom Answers](Custom-Answers-API), and use `typescript` syntax. Our script, in fact, will be written from scratch and will be very different from the original one both in logic and syntax. 
+ 
+Let's do it step by step, according to our [Recommended Structure](Basic-Use-Cases#basic-structure) rules. Those are not mandatory, but recommended. 
 
 ## Configuration
-Let's create our `configuration` using original config. Let's take the providers list, ttl and profile from OpenmixApplication argument:
+Let's create our `configuration` using original config. Let's take the `providers list`, `ttl` and `profile` from OpenmixApplication argument:
 ```javascript
 var handler = new OpenmixApplication({
     providers: {
@@ -353,7 +357,7 @@ And find in original script everything that can be moved to configuration. First
         }
     };
 ```
-Instead of original `getProbe` we will use [CDN Uptime](https://www.cdnperf.com/#!rum) and [CDN Performance](https://www.cdnperf.com/) data for provider ranking. That's why we do not need `http_kbps` we will just take `rtt` ratio and also define minimum `Uptime` value for a CDN Provider `availabilityThreshold` (`80` means 80% uptime):
+Instead of original `getProbe` we will use [CDN Uptime](https://www.cdnperf.com/#!rum) and [CDN Performance](https://www.cdnperf.com/) data for provider ranking. We do not collect throughput statistics, so we do not need `http_kbps` - we will take `rtt` ratio only - and also define minimum `Uptime` value for a CDN Provider `availabilityThreshold` (`80` means `80% uptime`, for Openmix apps default Availability Threshold it is also `80` ):
 ```typescript
     profiles: <any>{
         'rtt': 1.9, // rtt (Round Trip Time),
@@ -425,71 +429,39 @@ const configuration = {
 ```
 ## Functions
 
-Now let's prepare the function for platforms ranking. We will find the best CDN performance (minimal), and calculate rank based on formula `floor((best_performance / current_cdn_performance) * 1000) * profile_ratio`:
-```typescript
-/**
- * Generates rank by performance data
- */
-function rankPlatforms(cdnPerformanceData) {
-    // Get array of all providers and rtt in milliseconds
-    // for each one.
-    const maxPoints = 1000;
-    const min = Math.min(...cdnPerformanceData.map((item) => item.perf));
-    const {  profiles, defaultProfile } = configuration;
-
-    // Score is not based on the range, so I don't expect scores of 0 (which makes the weights in the next step more effective)
-    // For RTT
-    // 1000 for min, x for max
-    return cdnPerformanceData.map((provider): number => {
-        if (provider.perf <= 0) {
-            return 0;
-        }
-        const flooredPoints = Math.floor((min / provider.perf) * maxPoints);
-        return flooredPoints * profiles[defaultProfile];
-    });
-}
-
-```
-And total score formula that will use preferredMarket value for particular continent:
-```typescript
-/**
- * Calculate Total Score from given score and data
- */
-function calculateTotalScore(
-    cdnPerformanceData,
-    scores: number[],
-    continent?: TContinent,
-): number[] {
-    return cdnPerformanceData.map((provider, index) => {
-        let totalScore = scores[index];
-
-        // apply pricing penalties / boosts for (non) EU/NA traffic
-        if (continent && provider.provider.preferredMarkets[continent]) {
-            totalScore *= provider.provider.preferredMarkets[continent];
-        }
-
-        return totalScore;
-    });
-}
-```
-We will also add our common `getHighest` and `getRandom` functions.
+As we have mentioned, we do not collect `throughput` statistics, so we don't need `intersectObjects` function at all. We won't need `getLowestValue`, `getHighestValue` as well, we will have one function for highest value from array:
 ```typescript
 /**
  * Pick highest value from given array of numbers
  */
 const getHighest = (array: number[]): number => array.indexOf(Math.max(...array));
+``` 
+
+And one for random answer for the case of all providers availability is low:
+```typescript
 /**
  * Pick random element from given array of type
  */
 const getRandom = <T>(items:T[]):T =>  items[Math.floor(Math.random() * items.length)];
 ```
+We will also need two functions: `rankPlatforms` and `calculateTotalScore`, but those will be very different from 'original' and we will define them while writing our 'main' `onRequest` function.  
 
-Now, our logic. First let's parse our configuration, get the user location and filter all providers, removing those with no continent and 'bad' uptime:
+## Main Section
+Now, our logic. It will be placed inside 'main' `onRequest` function:
+```typescript
+function onRequest(request: IRequest, response: IResponse) {
+    ...
+    return;
+}
+```
+We hope you have already took a look at our [Request and Response interfaces](Custom-Answers-API#interfaces), we will use `request` to determine a user location.
+
+First let's parse our configuration, get the user location, then, filter all providers, removing those with uptime lower than `availabilityThreshold`. We will use [fetchCdnRumUptime](Custom-Answers-API#fetchcdnrumuptime) for uptime data retrieving, if we are able to detect user `continent`(`market`) - we operate with that continent statistics **fetchCdnRumUptime(provider.name, 'continent', continent)** and if not - we take the 'world' data by **fetchCdnRumUptime(provider.name))**:
 ```typescript
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     const { continent } = request.location;
 
-    // Filter providers by uptime more the
+    // Filter providers by uptime
     const availableProviders = providers.filter(
         (provider) =>
             (continent &&
@@ -497,16 +469,18 @@ Now, our logic. First let's parse our configuration, get the user location and f
                 fetchCdnRumUptime(provider.name)) > availabilityThreshold // uptime data for 60 minutes
     );
 ```  
-If they are all 'bad' - let's pick a random one as an answer:
+If `availableProviders` is empty, so no providers match our criteria - we pick a random one as an answer, remember, we have added the `getRandom` function earlier:
 ```typescript
-    // Return random provider from available.
+    // 'Bad' uptime, return random provider from available.
     if (!availableProviders.length) { // availableProviders
         response.setAddr(getRandom(providers).cname);
         response.setTTL(defaultTtl);
         return;
     }
 ```
-If we have the array of providers - let's get performances for the every available provider:
+So, if everything is 'bad' - we return a random answer.
+
+In case it goes fine and we have the array of available providers - we get performances for the every available provider, using [fetchCdnRumPerformance](Custom-Answers-API#fetchcdnrumperformance) either for user continent (if it is determined) of for 'world' performance:
 ```typescript
     // Else create array with performance data for each provider
     const cdnPerformanceData = availableProviders.map(
@@ -519,18 +493,63 @@ If we have the array of providers - let's get performances for the every availab
         })
     );
 ```
-And use our Total Score function to get score per provider:
+Now, we have the `cdnPerformanceData` array with providers and Real User Metric Performance per provider. Ant it is time to create our `calculateTotalScore` and `rankPlatforms` functions.
+
+Having `cdnPerformanceData`, let's find the best CDN performance (minimal, because the lower response in milliseconds- the better), and calculate rank based on the formula `floor((best_performance / current_cdn_performance) * 1000) * profile_ratio`. In fact, we have the only one `profile`, so could just skip related functionality, but we might need it for future features, so let's keep it. 
+
+Here goes the code:
 ```typescript
-    // Calculate total score by
+/**
+ * Generates rank by performance data
+ */
+function rankPlatforms(cdnPerformanceData) {
+    // Get array of all providers and performance in milliseconds for each one.
+    const maxPoints = 1000;
+    const min = Math.min(...cdnPerformanceData.map((item) => item.perf));
+    const {  profiles, defaultProfile } = configuration;
+
+    return cdnPerformanceData.map((provider): number => {
+        if (provider.perf <= 0) { // It won't happen most likely
+            return 0;
+        }
+        const flooredPoints = Math.floor((min / provider.perf) * maxPoints);
+        return flooredPoints * profiles[defaultProfile];
+    });
+}
+```
+Now we have ranks, let's apply continents(markets)-related penalties or boosts using `preferredMarket` value for particular continent and get the total score:
+```typescript
+/**
+ * Calculate Total Score from given score and data
+ */
+function calculateTotalScore(
+    cdnPerformanceData, // our providers data and performances
+    scores: number[], // the ranks array we got with the rankPlatforms function
+    continent?: TContinent, // user continent (if detected)
+): number[] {
+    return cdnPerformanceData.map((provider, index) => {
+        let totalScore = scores[index];
+
+        // apply pricing penalties / boosts if user continent is detected
+        if (continent && provider.provider.preferredMarkets[continent]) {
+            totalScore *= provider.provider.preferredMarkets[continent];
+        }
+
+        return totalScore;
+    });
+}
+```
+We are done with our functions, let's get back to our `onRequest` section and use our `calculateTotalScore` function to get score per provider:
+```typescript
+    // Calculate total score
     const totalScores = calculateTotalScore(
         cdnPerformanceData,
         rankPlatforms(cdnPerformanceData),
         request.location.continent
     );
 ```
-And finally - return the best one:
+And finally - return the best one, using `getHighest` function:
 ```typescript
-    // Return as default, provider with highest score
     response.setAddr(cdnPerformanceData[getHighest(totalScores)].provider.cname);
     response.setTTL(defaultTtl);
     return;
@@ -539,82 +558,76 @@ Here we go. **Our script looks like**:
 ```typescript
 // Main configuration
 const configuration = {
-    /** List of providers configuration */
-    providers: [
-        {
-            name: ('custom_defined_measured_cdn' as TCDNProvider),// CDN Provider alias to work with
-            cname: 'www.custom-cdn.com',// cname to pick as a result
-            preferredMarkets: {
-                'EU': 1.00,
-                'NA': 1.00,
-                'SA': 1.00,
-                'AF': 1.00,
-                'AS': 1.00,
-                'OC': 1.00,
-            }
-        },
-        {
-            name: ('stackpath-cdn' as TCDNProvider),
-            cname: 'www.foo.com',
-            preferredMarkets: {
-                'EU': 1.30,
-                'NA': 1.00,
-                'SA': 0.01,
-                'AF': 1.00,
-                'AS': 1.20,
-                'OC': 1.00,
-            }
-        },
-        {
-            name: ('stackpath-cdn' as TCDNProvider),
-            cname: 'www.bar.com',
-            preferredMarkets: {
-                'EU': 0.75,
-                'NA': 0.75,
-                'SA': 0.50,
-                'AF': 0.75,
-                'AS': 0.50,
-                'OC': 0.75,
-            }
-        },
-        {
-            name: ('verizon-edgecast-cdn' as TCDNProvider),
-            cname: 'www.baz.com',
-            preferredMarkets: {
-                'EU': 1.00,
-                'NA': 1.10,
-                'SA': 1.20,
-                'AF': 1.00,
-                'AS': 1.20,
-                'OC': 1.00,
-            }
-        },
-    ],
-    profiles: <any>{
-        'rtt': 1.9, // rtt (Round Trip Time) Use for small files,
-        'std': 1.25, // std (Standard) Combination of RTT and TRP
-        'trp': 0.5 // trp (Throughput) Use for large (> 100kb) files
-    },
-    defaultProfile: 'rtt',
-    defaultTtl: 300, // The DNS TTL to be applied to DNS responses in seconds.
-    availabilityThreshold: 80 // Board value for providers 'Uptime' to compare with
-};
+     /** List of providers configuration */
+     providers: [
+         {
+             name: ('custom_defined_measured_cdn' as TCDNProvider),// CDN Provider alias to work with
+             cname: 'www.custom-cdn.com',// cname to pick as a result
+             preferredMarkets: {
+                 'EU': 1.00,
+                 'NA': 1.00,
+                 'SA': 1.00,
+                 'AF': 1.00,
+                 'AS': 1.00,
+                 'OC': 1.00,
+             }
+         },
+         {
+             name: ('jsdelivr-cdn' as TCDNProvider),
+             cname: 'www.foo.com',
+             preferredMarkets: {
+                 'EU': 1.40,
+                 'NA': 1.00,
+                 'SA': 0.10,
+                 'AF': 1.00,
+                 'AS': 1.30,
+                 'OC': 1.00,
+             }
+         },
+         {
+             name: ('stackpath-cdn' as TCDNProvider),
+             cname: 'www.bar.com',
+             preferredMarkets: {
+                 'EU': 0.80,
+                 'NA': 0.80,
+                 'SA': 0.50,
+                 'AF': 0.80,
+                 'AS': 0.50,
+                 'OC': 0.80,
+             }
+         },
+         {
+             name: ('verizon-edgecast-cdn' as TCDNProvider),
+             cname: 'www.baz.com',
+             preferredMarkets: {
+                 'EU': 1.00,
+                 'NA': 1.20,
+                 'SA': 1.30,
+                 'AF': 1.00,
+                 'AS': 1.40,
+                 'OC': 1.00,
+             }
+         },
+     ],
+     profiles: <any>{
+         'rtt': 1.9, // rtt (Round Trip Time),
+     },
+     defaultProfile: 'rtt',
+     defaultTtl: 300, // The DNS TTL to be applied to DNS responses in seconds.
+     availabilityThreshold: 80 // Board value for providers 'Uptime' to compare with
+ };
 
 /**
  * Generates rank by performance data
  */
 function rankPlatforms(cdnPerformanceData) {
-    // Get array of all providers and rtt in milliseconds
-    // for each one.
+    // Get array of all providers and performance in milliseconds for each one.
     const maxPoints = 1000;
     const min = Math.min(...cdnPerformanceData.map((item) => item.perf));
     const {  profiles, defaultProfile } = configuration;
 
-    // Score is not based on the range, so I don't expect scores of 0 (which makes the weights in the next step more effective)
-    // For RTT
-    // 1000 for min, x for max
     return cdnPerformanceData.map((provider): number => {
-        if (provider.perf <= 0) {
+        if (provider.perf <= 0) { // It won't happen most likely
             return 0;
         }
         const flooredPoints = Math.floor((min / provider.perf) * maxPoints);
@@ -626,14 +639,14 @@ function rankPlatforms(cdnPerformanceData) {
  * Calculate Total Score from given score and data
  */
 function calculateTotalScore(
-    cdnPerformanceData,
-    scores: number[],
-    continent?: TContinent,
+    cdnPerformanceData, // our providers data and performances
+    scores: number[], // the ranks array we got with the rankPlatforms function
+    continent?: TContinent, // user continent (if detected)
 ): number[] {
     return cdnPerformanceData.map((provider, index) => {
         let totalScore = scores[index];
 
-        // apply pricing penalties / boosts for (non) EU/NA traffic
+        // apply pricing penalties / boosts if user continent is detected
         if (continent && provider.provider.preferredMarkets[continent]) {
             totalScore *= provider.provider.preferredMarkets[continent];
         }
@@ -655,15 +668,15 @@ function onRequest(request: IRequest, response: IResponse) {
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     const { continent } = request.location;
 
-    // Filter providers by uptime more the
+    // Filter providers by uptime
     const availableProviders = providers.filter(
         (provider) =>
             (continent &&
                 fetchCdnRumUptime(provider.name, 'continent', continent) ||
-                fetchCdnRumUptime(provider.name)) > availabilityThreshold // uptime data for 10 minutes
+                fetchCdnRumUptime(provider.name)) > availabilityThreshold // uptime data for 60 minutes
     );
 
-    // Return random provider from available.
+    // 'Bad' uptime, return random provider from available.
     if (!availableProviders.length) { // availableProviders
         response.setAddr(getRandom(providers).cname);
         response.setTTL(defaultTtl);
@@ -681,7 +694,7 @@ function onRequest(request: IRequest, response: IResponse) {
         })
     );
 
-    // Calculate total score by
+    // Calculate total score
     const totalScores = calculateTotalScore(
         cdnPerformanceData,
         rankPlatforms(cdnPerformanceData),
