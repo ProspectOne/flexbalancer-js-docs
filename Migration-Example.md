@@ -1,6 +1,12 @@
 # The Performance-Based Answer with Preferred Market Weights
 ## The Case
-We have a set of answers with CDN providers. Each provider in our set has special `ratio` number for every continent, that determines the location penalties / boosts for that particular provider. For example, we want the users from Europe get preferred (so appear more oftenly) answer from `CDN provider 1`, and users from South America should preferrably get answer from `CDN Provider 2`.
+We have a set of answers associated with with CDN providers. 
+
+Each provider in our set has special ratio number for every continent(market), that determines the location penalties / boosts for that particular provider. For example, we want the users from Europe get preferred answer from `JSDelivr`, so it has ratio 1.40 (means `boost`). and users from South America should preferably get answer from `Verizon`, with boost ratio 1.30. 
+
+The answer candidate (providers) also must have uptime more than 80%. 
+
+Each candidate performance (`rtt`,`latency`) must also be taken into account.
 
 Here goes the `original` Cedexis Openmix Application script:
 
@@ -357,7 +363,7 @@ And find in original script everything that can be moved to configuration. First
         }
     };
 ```
-Instead of original `getProbe` we will use [CDN Uptime](https://www.cdnperf.com/#!rum) and [CDN Performance](https://www.cdnperf.com/) data for provider ranking. We do not collect throughput statistics, so we do not need `http_kbps` - we will take `rtt` ratio only - and also define minimum `Uptime` value for a CDN Provider `availabilityThreshold` (`80` means `80% uptime`, for Openmix apps default Availability Threshold it is also `80` ):
+Instead of original `getProbe` we will use [CDN Uptime](https://www.cdnperf.com/#!rum) and [CDN Performance](https://www.cdnperf.com/) data for provider ranking. We do not collect throughput statistics, so we do not need `http_kbps` - we will take `rtt` ratio only - and also define minimal `Uptime` value for a CDN Provider `availabilityThreshold` (`80` means `80% uptime`, for Openmix apps default Availability Threshold it is also `80` ):
 ```typescript
     profiles: <any>{
         'rtt': 1.9, // rtt (Round Trip Time),
@@ -365,7 +371,7 @@ Instead of original `getProbe` we will use [CDN Uptime](https://www.cdnperf.com/
     ...
     availabilityThreshold: 80 // Board value for providers 'Uptime' to compare with
 ``` 
-We have got out `configuration` now!
+We have got our `configuration` now!
 ```typescript
 const configuration = {
     /** List of providers configuration */
@@ -456,7 +462,7 @@ function onRequest(request: IRequest, response: IResponse) {
 ```
 We hope you have already took a look at our [Request and Response interfaces](Custom-Answers-API#interfaces), we will use `request` to determine a user location.
 
-First let's parse our configuration, get the user location, then, filter all providers, removing those with uptime lower than `availabilityThreshold`. We will use [fetchCdnRumUptime](Custom-Answers-API#fetchcdnrumuptime) for uptime data retrieving, if we are able to detect user `continent`(`market`) - we operate with that continent statistics **fetchCdnRumUptime(provider.name, 'continent', continent)** and if not - we take the 'world' data by **fetchCdnRumUptime(provider.name))**:
+First let's parse our configuration, get the user location, then, filter all providers, removing those with uptime lower than `availabilityThreshold`. We will use [fetchCdnRumUptime](Custom-Answers-API#fetchcdnrumuptime) for uptime data retrieving, if we are able to detect user `continent`(`market`) - we operate with that continent statistics received via **fetchCdnRumUptime(provider.name, 'continent', continent)**. If continent is not determined - we take the 'world' data with **fetchCdnRumUptime(provider.name))**:
 ```typescript
     const { providers, defaultTtl, availabilityThreshold } = configuration;
     const { continent } = request.location;
@@ -493,7 +499,7 @@ In case it goes fine and we have the array of available providers - we get perfo
         })
     );
 ```
-Now, we have the `cdnPerformanceData` array with providers and Real User Metric Performance per provider. Ant it is time to create our `calculateTotalScore` and `rankPlatforms` functions.
+Now, we have the `cdnPerformanceData` array with providers and Real User Metric Performance per provider. And it is time to create our `calculateTotalScore` and `rankPlatforms` functions.
 
 Having `cdnPerformanceData`, let's find the best CDN performance (minimal, because the lower response in milliseconds- the better), and calculate rank based on the formula `floor((best_performance / current_cdn_performance) * 1000) * profile_ratio`. In fact, we have the only one `profile`, so could just skip related functionality, but we might need it for future features, so let's keep it. 
 
