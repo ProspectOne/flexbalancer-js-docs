@@ -16,4 +16,5 @@ With the Custom Code FlexBalancer feature you are able to write your own javascr
 * [[Set up IDE text editor (VSCode)|Setting-up-VSCode]]
 * [[Basic Use Cases|Basic-Use-Cases]]
 * [[Advanced Solutions|Advanced-Solutions]]
+* [[Cedexis Migration Example|Cedexis-Migration-Example]]
 

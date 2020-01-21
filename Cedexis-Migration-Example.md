@@ -313,7 +313,7 @@ function OpenmixApplication(settings) {
 ```
 Quite complicated, isn't it?
 
-The important thing to mention is that PerfOps uses quite different from `Openmix getProbe` approach for the performance monitoring. It is based on [Real User Metrics(RUM) data](https://www.cdnperf.com/) collected from users all over the world.
+The important thing to mention is that PerfOps uses quite different approach to `Opemix getProbe` for the performance monitoring. It is based on [Real User Metrics(RUM) data](https://www.cdnperf.com/) collected from users all over the world.
 
 So, our task is to rewrite that script for [fetchCdnRumUptime](Custom-Answers-API#fetchcdnrumuptime) and [fetchCdnRumPerformance](Custom-Answers-API#fetchcdnrumperformance) functionalities provided by [PerfOps Custom Answers](Custom-Answers-API), and use `typescript` syntax. Our script, in fact, will be written from scratch and will be very different from the original one both in logic and syntax. 
  
