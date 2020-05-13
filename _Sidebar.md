@@ -24,3 +24,5 @@
 * [[Solution 4: Multi Geo-Random with Monitor Overrides.|Solution-4]]
 
 [[Set up VSCode|Setting-up-VSCode]]
+
+[[Cedexis Migration Example|Cedexis-Migration-Example]]

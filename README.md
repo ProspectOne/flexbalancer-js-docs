@@ -16,3 +16,4 @@ With the Custom Code FlexBalancer feature you are able to write your own javascr
 * [Set up IDE text editor (VSCode)](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Setting-up-VSCode)
 * [Basic Use Cases](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Basic-Use-Cases)
 * [Advanced Solutions](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Advanced-Solutions)
+* [Cedexis Migration Example](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Cedexis-Migration-Example)
