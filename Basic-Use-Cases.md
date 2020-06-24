@@ -110,4 +110,6 @@ As we have mentioned, feel free to implement your own structure and solutions. T
 **The Case**: User has different providers for 2 regions - using 1 CDN for the USA and another CDN for the rest of the world. [Go to the Use Case](Case-3.1)
 ## Case 3.2: The specific answer for the specific region <a name="case3.2"></a>
 **The Case**: User has different CDN provider for each continent, we need to set corresponding answer or fallback if continent is not determined. [Go to the Use Case](Case-3.2)
+## Case 3.3 Pick the best performance provider for user country <a name="case3.3"></a>
+**The Case**: One of the most popular cases: select the CDN with the best performance for visitor's country.. [Go to the Use Case](Case-3.3)
 ## More Use Cases coming soon!
