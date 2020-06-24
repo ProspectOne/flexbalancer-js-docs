@@ -18,6 +18,7 @@
         * [lookupAsn](#lookupasn)
         * [isIpInRange](#isipinrange)
         * [isIpInMask](#isipinmask)
+        * [fetchRemote](#fetchremote)
 
 ## Application 
 
@@ -47,9 +48,26 @@ function onRequest(req: IRequest, res: IResponse) {
 }
 ```
 
-The interfaces implemented by `request` and `response` : 
+### onSetup Function
+
+**onSetup(): IApplicationConfig**
+
+This function is mostly used for adding remote sources (external APIs etc):
+
+```typescript
+function onSetup():IApplicationConfig {
+    return {
+        remotes: {
+            // Set up remote data source
+            'mydata': { url: 'https://get.some.important.data.com/test.json' }
+        }
+    }
+}
+```
 
 ### Interfaces
+
+The interfaces implemented by `request` and `response` : 
 
 **IRequest**
 
@@ -102,7 +120,56 @@ declare interface IResponse {
     setTTL(ttl: number): void;
 }
 ```
-Types that are used at that interfaces are listed at the section below.
+***
+**IApplicationConfig**
+
+The interface that `onSetup` function returns.
+
+```typescript
+declare interface IApplicationConfig {
+    remotes?: {
+        [key: string]: {
+            url: string
+        }
+    }
+}
+```
+Used to specify remote sources.
+***
+**ILogger** interface and constant **logger**
+
+```typescript
+/**
+ * Logger interface
+ */
+declare interface ILogger {
+    /**
+     * Write a message to the log.
+     *
+     * Logged messages will be visible in the Raw Logs for
+     * current Flex Balancer in the Panel
+     */
+    write(message: string): void;
+}
+```
+```typescript
+declare const logger: ILogger;
+```
+Useful if you need to log any events that can be seen at the Raw Logs list of the [PerfOps Panel](https://panel.perfops.net)
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    ...
+    // Write log
+    logger.write('start processing');
+    ...
+    logger.write('finished');
+    ...
+}
+```
+
+***
+Types that are used at `IRequest` and `IResponce` interfaces are listed at the section below.
 
 ## Provided functions
 
@@ -711,5 +778,25 @@ function onRequest(req: IRequest, res: IResponse) {
         return;
     }
 ...
+}
+```
+***
+**fetchRemote(name: string): string | null** <a name="fetchremote"></a>
+
+* **name** - *(string)* - the name of the remote source, defined by `onSetup` Application function
+
+Returns remote source response.
+
+Example:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    // Collect data from fetched remote
+    let stats = fetchRemote('mydata');
+    if(stats) {
+        logger.write('stats fetched');
+        ...
+    }
+    ...
 }
 ```
