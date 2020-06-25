@@ -9,13 +9,16 @@
 * [Lesson 7: The simple country-based answer.](#countrysimple)
 * [Lesson 8: Different answers for different countries.](#diffcountries)
 * [Lesson 9: Countries based answers with random selection.](#countrieswithrandom)
+* [Lesson 10: Remote API response based answers](#remoteapiusage)
 
 First of all, couple of words regarding the script structure. All main Custom Answer logic is placed inside the 'Main' function `onRequest`. It has two params: `req` (Request) and `res` (Response). 
 
 * **req** (Request) - provides you with all available information regarding user request.
 * **res** (Response) - helps you to form the specific answer, has `setAddr` and `setTTL` methods for that.
 
-Our types, interfaces and functions are described here: [[Custom-Answers-API|Custom-Answers-API]] 
+Another important function is `onSetup`, it is used to specify remote source data and is explained in the [Lesson 10](#remoteapiusage). 
+
+Our types, interfaces and functions are described here: [[Custom-Answers-API|Custom-Answers-API]]
 
 ## Lesson 1: Check if the user ip is at the specific range. <a name="specificrange"></a>
 
@@ -796,5 +799,41 @@ testcustom.0b62ec.flexbalancer.net. 20 IN CNAME uaone.myanswers.com.
 Congratulations! Everything works fine!
 
 As we have mentioned - the last script was simplified version of one of our sample scripts, that are available at our repository. Feel free to investigate!
+
+## Lesson 10: Remote API response based answers. <a name="remoteapiusage"></a>
+
+We have also created functionality that allows external API usages. Let's illustrate it with some simple example.
+
+Imagine that we use different answers depending on day of the year, the Moon phases, whatever. And we _do not know_ what hostname should we use as our answer at the moment. 
+But we have some API, for example `https://relevant.answer.myanswerapi.org` that simply returns us currently available (relevant) answer. 
+It can be `answer1.myanswers.org`, `answer20.myanswers.org` or any other. In fact we don't care, all we need is to retrieve that answer from that API and use it as an answer for our FlexBalancer.
+
+In order to do this, we need to specify our remote source first. We use `onSetup` function:
+```typescript
+function onSetup():IApplicationConfig {
+    return {
+        remotes: {
+            // Set up remote data source
+            'answer': { url: 'https://relevant.answer.myanswerapi.org' }
+        }
+    }
+}
+```
+
+So, all we need now is to create a simplest logic:
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    // Get the answer from fetched remote
+    let answer = fetchRemote('answer');
+    if(answer) { // if we got anything
+        res.setAddr(answer);
+    } else { // if not - we use fallback 
+        res.setaddr('my.fallback.org');
+    }
+    return;
+}
+```
+Remote API answers are cached for 5 minutes, so if that API answer changes - it will take a new one after cache is expired.
+ 
 
 ## Good Luck!!!
