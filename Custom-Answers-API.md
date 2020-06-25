@@ -351,7 +351,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Returns world uptime value for the particular CDN provider. [The higher value - the better uptime.](https://www.cdnperf.com/#!rum)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -374,7 +374,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns location-based uptime value for the particular CDN provider. [The higher value - the better uptime.](https://www.cdnperf.com/#!rum)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -393,7 +393,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Similar to the previous function but returns World RUM Performance value. [The lower value - the better performance.](https://www.cdnperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -416,7 +416,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns the location-based CDN performance value. [The lower value - the better performance.](https://www.cdnperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -435,7 +435,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Returns world uptime value for the particular Cloud provider. [The higher value - the better uptime.](https://www.cloudperf.com/?s=uptime)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -459,7 +459,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns location-based uptime value for the particular Cloud provider. [The higher value - the better uptime.](https://www.cloudperf.com/?s=uptime)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -479,7 +479,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Similar to the previous function but returns the World Performance (Latency) value. [The lower value - the better performance.](https://www.cloudperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -503,7 +503,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns the location-based Cloud performance (Latency) value. [The lower value - the better performance.](https://www.cloudperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
