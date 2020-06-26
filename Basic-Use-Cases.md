@@ -110,4 +110,6 @@ As we have mentioned, feel free to implement your own structure and solutions. T
 **The Case**: User has different providers for 2 regions - using 1 CDN for the USA and another CDN for the rest of the world. [Go to the Use Case](Case-3.1)
 ## Case 3.2: The specific answer for the specific region <a name="case3.2"></a>
 **The Case**: User has different CDN provider for each continent, we need to set corresponding answer or fallback if continent is not determined. [Go to the Use Case](Case-3.2)
+## Case 4.1: Using country-based answers from remote sources <a name="case4.1"></a>
+**The Case**: A customer keeps his answers-for-countries information as JSON at some remote source, wants to retrieve it and use for balancing. [Go to the Use Case](Case-4.1)  
 ## More Use Cases coming soon!
