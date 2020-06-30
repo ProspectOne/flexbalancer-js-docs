@@ -37,13 +37,13 @@ For example, you want to set particular answer for users from `France`.
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     if(req.location.country && req.location.country == 'FR') {
-        res.setAddr('answer.mysite.fr');
+        res.setCNAMERecord('answer.mysite.fr');
         res.setTTL(25);
 
         return;
     }
 
-    res.setAddr('mysite.net');
+    res.setCNAMERecord('mysite.net');
     return;
 }
 ```
@@ -105,14 +105,19 @@ declare interface IRequest {
 ```typescript
 declare interface IResponse {
     /**
-    * Set the result to a single address
+    * Set the result to a single A record
     */
-    setAddr(addr: string): void;
+    setARecord(addr: string): void;
 
     /**
-     * Add address to the results for a multi-address answer
+     * Add address to the results for a multi-record (A-records) answer
      */
-    addAddr(addr: string): void;
+    addARecord(addr: string): void;
+
+    /**
+     * Set CNAME record as an answer
+     */
+    setCNAMERecord(hostname: string): void;
 
     /**
      * Time to live in seconds
@@ -130,6 +135,9 @@ declare interface IApplicationConfig {
     remotes?: {
         [key: string]: {
             url: string
+            headers?: {
+                [key: string]: string;
+            }
         }
     }
 }
@@ -169,7 +177,7 @@ function onRequest(req: IRequest, res: IResponse) {
 ```
 
 ***
-Types that are used at `IRequest` and `IResponce` interfaces are listed at the section below.
+Types that are used at `IRequest` and `IResponse` interfaces are listed at the section below.
 
 ## Provided functions
 
@@ -704,7 +712,7 @@ Example:
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupContinent(req.ip, 'SA', 10);
+    let ipBelongsTo = lookupContinent(req.ip, 'SA', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -772,7 +780,7 @@ Example:
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     if(isIpInMask(req.ip, '145.2.3.4/16')) {
-        res.setAddr(['mask16.com']);
+        res.setCNAMERecord(['mask16.com']);
         res.setTTL(30);
         ...​
         return;

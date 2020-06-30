@@ -57,7 +57,7 @@ function onRequest(req: IRequest, res: IResponse) {
         );
         // If we found proper geo candidates, return one of them by random
         if (geoFilteredCandidates.length) {
-            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setCNAMERecord(getRandomElement(geoFilteredCandidates).cname);
             res.setTTL(defaultTtl);
             return;
         }
@@ -68,12 +68,12 @@ function onRequest(req: IRequest, res: IResponse) {
 
     //Choose random candidate as response if we have any
     if (properCandidates.length) {
-        res.setAddr(getRandomElement(properCandidates).cname);
+        res.setCNAMERecord(getRandomElement(properCandidates).cname);
         res.setTTL(defaultTtl);
         return;
     }
     // Fallback pick 'origin' cname
-    res.setAddr('www.origin.com');
+    res.setCNAMERecord('www.origin.com');
     res.setTTL(defaultTtl);
     return;
 }

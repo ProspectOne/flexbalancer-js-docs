@@ -65,7 +65,7 @@ If there is the only one provider -  set answer to `cname` associated with it & 
 ```typescript
     // If we have single result, then return it
     if (filteredProvidersData.length === 1) {
-        res.setAddr(filteredProvidersData[0].provider.cname);
+        res.setCNAMERecord(filteredProvidersData[0].provider.cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -73,7 +73,7 @@ If there is the only one provider -  set answer to `cname` associated with it & 
 Well in that case when more than one providers have equal uptimes - let's pick the one with the highest weight and return its `cname`:
 ```typescript
     // If we have few results with same uptime, return cname of the provider with highest weight
-    res.setAddr(getHighestByProperty(filteredProvidersData.map(item => item.provider), 'weight').cname);
+    res.setCNAMERecord(getHighestByProperty(filteredProvidersData.map(item => item.provider), 'weight').cname);
     res.setTTL(defaultTtl);
     return;
 ```
@@ -132,13 +132,13 @@ function onRequest(req: IRequest, res: IResponse) {
 
     // If we have single result, then return it
     if (filteredProvidersData.length === 1) {
-        res.setAddr(filteredProvidersData[0].provider.cname);
+        res.setCNAMERecord(filteredProvidersData[0].provider.cname);
         res.setTTL(defaultTtl);
         return;
     }
 
     // If we have few results with same uptime, return cname of the provider with highest weight
-    res.setAddr(getHighestByProperty(filteredProvidersData.map(item => item.provider), 'weight').cname);
+    res.setCNAMERecord(getHighestByProperty(filteredProvidersData.map(item => item.provider), 'weight').cname);
     res.setTTL(defaultTtl);
     return;
 }

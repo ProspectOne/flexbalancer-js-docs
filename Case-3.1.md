@@ -38,7 +38,7 @@ We have the default provider (that is used for all countries other than the USA)
 ```typescript
     // Set default answer
     let defaultAnswer = (defaultCandidate) ? defaultCandidate.cname : fallBack;
-    res.setAddr(defaultAnswer);
+    res.setCNAMERecord(defaultAnswer);
     res.setTTL(defaultTtl);
 ```
 The rest of the code is pretty simple, we check if the user country was determined and if it is and it is the USA - set answer to appropriate provider cname:
@@ -50,7 +50,7 @@ The rest of the code is pretty simple, we check if the user country was determin
         );
 
         if (candidate) {
-            res.setAddr(candidate.cname);
+            res.setCNAMERecord(candidate.cname);
         }
     }
 ```
@@ -84,7 +84,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
     // Set default answer
     let defaultAnswer = (defaultCandidate) ? defaultCandidate.cname : fallBack;
-    res.setAddr(defaultAnswer);
+    res.setCNAMERecord(defaultAnswer);
     res.setTTL(defaultTtl);
 
     // Check if user country is determined and has corresponding provider
@@ -94,7 +94,7 @@ function onRequest(req: IRequest, res: IResponse) {
         );
 
         if (candidate) {
-            res.setAddr(candidate.cname);
+            res.setCNAMERecord(candidate.cname);
         }
     }
     return;

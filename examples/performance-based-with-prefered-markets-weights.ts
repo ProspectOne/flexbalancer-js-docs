@@ -127,7 +127,7 @@ function onRequest(request: IRequest, response: IResponse) {
 
     // Return random provider from available.
     if (!availableProviders.length) { // availableProviders
-        response.setAddr(getRandom(providers).cname);
+        response.setCNAMERecord(getRandom(providers).cname);
         response.setTTL(defaultTtl);
         return;
     }
@@ -151,7 +151,7 @@ function onRequest(request: IRequest, response: IResponse) {
     );
 
     // Return as default, provider with highest score
-    response.setAddr(cdnPerformanceData[getHighest(totalScores)].provider.cname);
+    response.setCNAMERecord(cdnPerformanceData[getHighest(totalScores)].provider.cname);
     response.setTTL(defaultTtl);
     return;
 }

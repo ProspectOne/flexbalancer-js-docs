@@ -53,7 +53,7 @@ function onRequest(req: IRequest, res: IResponse) {
     const { providers, defaultTtl, fallBack } = configuration;
 
     // Set fallback as default answer
-    res.setAddr(fallBack);
+    res.setCNAMERecord(fallBack);
     res.setTTL(defaultTtl);
     ...
 }
@@ -67,7 +67,7 @@ The rest of the code is almost the same as at the previous sample, we just check
         );
 
         if (candidate) {
-            res.setAddr(candidate.cname);
+            res.setCNAMERecord(candidate.cname);
         }
     }
     return;
@@ -116,7 +116,7 @@ function onRequest(req: IRequest, res: IResponse) {
     const { providers, defaultTtl, fallBack } = configuration;
 
     // Set fallback as default answer
-    res.setAddr(fallBack);
+    res.setCNAMERecord(fallBack);
     res.setTTL(defaultTtl);
 
     // Check if user continent is determined and select corresponding answer
@@ -126,7 +126,7 @@ function onRequest(req: IRequest, res: IResponse) {
         );
 
         if (candidate) {
-            res.setAddr(candidate.cname);
+            res.setCNAMERecord(candidate.cname);
         }
     }
     return;

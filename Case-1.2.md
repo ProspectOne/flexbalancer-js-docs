@@ -56,7 +56,7 @@ If all Monitors are down - return a random answer:
 ```typescript
     // If all monitors states are 'DOWN', choose random answer.
     if (monitorFilteredProviders.length === 0) {
-        res.setAddr(providers[Math.floor(Math.random() * providers.length)].cname);
+        res.setCNAMERecord(providers[Math.floor(Math.random() * providers.length)].cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -71,7 +71,7 @@ If there are working Monitors - select the answer with the best uptime value and
         })
     );
         // Set the response TTL to the defaultTtl, select the answer with the best monitor uptime
-    res.setAddr(getHighestByProperty(perfProvidersData, 'uptime').provider.cname);
+    res.setCNAMERecord(getHighestByProperty(perfProvidersData, 'uptime').provider.cname);
     res.setTTL(defaultTtl);
     return;
 ```
@@ -113,7 +113,7 @@ function onRequest(req: IRequest, res: IResponse) {
     );
     // If all monitors states are 'DOWN', choose random answer.
     if (monitorFilteredProviders.length === 0) {
-        res.setAddr(providers[Math.floor(Math.random() * providers.length)].cname);
+        res.setCNAMERecord(providers[Math.floor(Math.random() * providers.length)].cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -125,7 +125,7 @@ function onRequest(req: IRequest, res: IResponse) {
         })
     );
         // Set the response TTL to the defaultTtl, select the answer with the best monitor uptime
-    res.setAddr(getHighestByProperty(perfProvidersData, 'uptime').provider.cname);
+    res.setCNAMERecord(getHighestByProperty(perfProvidersData, 'uptime').provider.cname);
     res.setTTL(defaultTtl);
     return;
 }

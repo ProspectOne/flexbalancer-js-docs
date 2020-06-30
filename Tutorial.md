@@ -14,15 +14,18 @@
 First of all, couple of words regarding the script structure. All main Custom Answer logic is placed inside the 'Main' function `onRequest`. It has two params: `req` (Request) and `res` (Response). 
 
 * **req** (Request) - provides you with all available information regarding user request.
-* **res** (Response) - helps you to form the specific answer, has `setAddr` and `setTTL` methods for that.
+* **res** (Response) - helps you to form the specific answer, has `setCNAMERecord` and `setTTL` methods for that.
 
 Another important function is `onSetup`, it is used to specify remote source data and is explained in the [Lesson 10](#remoteapiusage). 
 
 Our types, interfaces and functions are described here: [[Custom-Answers-API|Custom-Answers-API]]
 
+In our tutorial, we provide various examples and show how those work using `dig` utility for tests. But in fact, there are many other ways to test your balancers, so we have also written an article that might be helpful: 
+<a href="https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer" target="_blank">How to test my FlexBalancer?</a> 
+
 ## Lesson 1: Check if the user ip is at the specific range. <a name="specificrange"></a>
 
-First of all, let's create the simpliest answer. It will check the user ip and if it is in specific range - return `answer.formyiprange.net` with TTL 10. If it is not - return `answer.otherranges.net` with TTL 15.
+Now, let's create the simpliest answer. It will check the user ip and if it is in specific range - return `answer.formyiprange.net` with TTL 10. If it is not - return `answer.otherranges.net` with TTL 15.
 
 We have the user IP at our IRequest interface:
 
@@ -48,7 +51,7 @@ So let's edit our 'onRequest' logic. We will use our predefined **isIpInRange(ip
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
-        res.setAddr('answer.formyiprange.net'); // Set 'addr' for answer
+        res.setCNAMERecord('answer.formyiprange.net'); // Set 'addr' for answer
         res.setTTL(10); // Set TTL
 
         return;
@@ -61,7 +64,7 @@ And if the user IP is not at that range it should return `answer.otherranges.net
 ```typescript
     ...
     }
-    res.setAddr('answer.otherranges.net');
+    res.setCNAMERecord('answer.otherranges.net');
     res.setTTL(15);
 
     return;
@@ -76,13 +79,13 @@ const ipTo = '134.249.250.0';
 
 function onRequest(req: IRequest, res: IResponse) {
     if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
-        res.setAddr('answer.formyiprange.net'); // It is, set 'addr' for answer
+        res.setCNAMERecord('answer.formyiprange.net'); // It is, set 'addr' for answer
         res.setTTL(10); // Set TTL
 
         return;
     }
     // IP is not in that range
-    res.setAddr('answer.otherranges.net');
+    res.setCNAMERecord('answer.otherranges.net');
     res.setTTL(15);
 
     return;
@@ -132,10 +135,10 @@ Now we implement the simple logic:
 ```typescript
     const userInRadius = lookupCity(req.ip, cityToCheckGeoNameId, distanceThreshold);
     if(userInRadius  === true) { // 'yes', user is in 100km from Amsterdam
-        res.setAddr(cityToCheckAnswer); // set answer for Amsterdam
+        res.setCNAMERecord(cityToCheckAnswer); // set answer for Amsterdam
         return;
     }
-    res.setAddr(defaultAnswer); // It is not Amsterdam, return answer for other cities
+    res.setCNAMERecord(defaultAnswer); // It is not Amsterdam, return answer for other cities
     return;
 ```
 
@@ -149,10 +152,10 @@ const defaultAnswer = 'othercity.myanswer.net'; // answer for other cities
 function onRequest(req: IRequest, res: IResponse) {
     const userInRadius = lookupCity(req.ip, cityToCheckGeoNameId, distanceThreshold);
     if(userInRadius  === true) { // 'yes', user is in 100km from Amsterdam
-        res.setAddr(cityToCheckAnswer); // set answer for Amsterdam
+        res.setCNAMERecord(cityToCheckAnswer); // set answer for Amsterdam
         return;
     }
-    res.setAddr(defaultAnswer); // It is not Amsterdam, return answer for other cities
+    res.setCNAMERecord(defaultAnswer); // It is not Amsterdam, return answer for other cities
     return;
 }
 ```
@@ -188,7 +191,7 @@ const asnTTL = 20;
 function onRequest(req: IRequest, res: IResponse) {
     let asnInfo = lookupAsn(req.ip);
     if(asnInfo && asnInfo.autonomousSystemNumber == asnToCheck) {
-        res.setAddr(asnAnswer);
+        res.setCNAMERecord(asnAnswer);
         res.setTTL(asnTTL);
     }
     return; // either asn related data or fallback 
@@ -231,7 +234,7 @@ Now, if values are equal - we'll return random answer from our array:
     // if Uptime values are equal - return random answer
     if(jsDelivrUp == googleCloudUp) {
         const randomAnswer = answers[Math.floor(Math.random()*answers.length)];
-        res.setAddr(randomAnswer);
+        res.setCNAMERecord(randomAnswer);
         return;
     }
 ```
@@ -240,7 +243,7 @@ And if those are not equal - return answer from the CDN with better uptime:
     // get answer based on higher uptime
     const answer = (jsDelivrUp > googleCloudUp) ? answers[0] : answers[1];
 
-    res.setAddr(answer); // return answer
+    res.setCNAMERecord(answer); // return answer
     return;
 ```
 As the result, we get our final script:
@@ -258,14 +261,14 @@ function onRequest(req: IRequest, res: IResponse) {
     // if Uptime values are equal - return random answer
     if(jsDelivrUp == googleCloudUp) {
         const randomAnswer = answers[Math.floor(Math.random()*answers.length)];
-        res.setAddr(randomAnswer);
+        res.setCNAMERecord(randomAnswer);
         return;
     }
 
     // get answer based on higher uptime
     const answer = (jsDelivrUp > googleCloudUp) ? answers[0] : answers[1];
 
-    res.setAddr(answer); // return answer
+    res.setCNAMERecord(answer); // return answer
     return;
 }
 ```
@@ -299,7 +302,7 @@ If the performances are not equal - we return answer from the CDN with faster pe
     // get answer based on faster performance
     const answer = (jsDelivrPerf < googleCloudUp) ? answers[0] : answers[1];
 
-    res.setAddr(answer); // return answer
+    res.setCNAMERecord(answer); // return answer
     return;
 ```
 As the result, we get our script:
@@ -317,14 +320,14 @@ function onRequest(req: IRequest, res: IResponse) {
     // if query speeds are equal - return random answer
     if(jsDelivrPerf == googleCloudPerf) {
         const randomAnswer = answers[Math.floor(Math.random()*answers.length)];
-        res.setAddr(randomAnswer);
+        res.setCNAMERecord(randomAnswer);
         return;
     }
 
     // get answer based on faster performance
     const answer = (jsDelivrPerf < googleCloudUp) ? answers[0] : answers[1];
 
-    res.setAddr(answer); // return answer
+    res.setCNAMERecord(answer); // return answer
     return;
 }
 ```
@@ -402,14 +405,14 @@ function onRequest(req: IRequest, res: IResponse) {
     if(firstUp == secondUp) {
         const answers = [answerOne.answer, answerTwo.answer]; // form answers array
         const randomAnswer = answers[Math.floor(Math.random()*answers.length)];
-        res.setAddr(randomAnswer);
+        res.setCNAMERecord(randomAnswer);
         return;
     }
 
     // get answer based on higher uptime
     const answer = (firstUp > secondUp) ? answerOne.answer : answerTwo.answer;
 
-    res.setAddr(answer); // return answer
+    res.setCNAMERecord(answer); // return answer
     return;
 }
 ```
@@ -464,13 +467,13 @@ That means the user request does not have any information regarding the country.
 If it has the country info - let's check it is not the US and return `common` answer:
 ```typescript
     if(req.location.country != specCountryIso) {
-        res.setAddr(allCountriesAnswer); // any country but the USA
+        res.setCNAMERecord(allCountriesAnswer); // any country but the USA
         return;
     }
 ```
 And, finally - the US answer:
 ```typescript
-    res.setAddr(specCountryAnswer); // the US answer
+    res.setCNAMERecord(specCountryAnswer); // the US answer
     return;
 ```
 
@@ -486,11 +489,11 @@ function onRequest(req: IRequest, res: IResponse) {
     }
 
     if(req.location.country != specCountryIso) {
-        res.setAddr(allCountriesAnswer); // any country but the USA
+        res.setCNAMERecord(allCountriesAnswer); // any country but the USA
         return;
     }
 
-    res.setAddr(specCountryAnswer); // the US answer
+    res.setCNAMERecord(specCountryAnswer); // the US answer
     return;
 }
 ```
@@ -543,7 +546,7 @@ Let's set the default response first, it will be used if the user country is not
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
-    res.setAddr('answer.othercountries.net');
+    res.setCNAMERecord('answer.othercountries.net');
     res.setTTL(15);
     ...
 }
@@ -553,7 +556,7 @@ So let's check & process the case when `country` is empty, does not have any val
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
-    res.setAddr('answer.othercountries.net');
+    res.setCNAMERecord('answer.othercountries.net');
     res.setTTL(15);
 
     if (!req.location.country) { // unable to determine user country or it is empty
@@ -567,7 +570,7 @@ Then, let's cycle through our country objects and if the user country matches an
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
-    res.setAddr('answer.othercountries.net'); // Set default addr
+    res.setCNAMERecord('answer.othercountries.net'); // Set default addr
     res.setTTL(15); // And default TTL
 
     if (!req.location.country) { // If no country at request
@@ -576,7 +579,7 @@ function onRequest(req: IRequest, res: IResponse) {
     
     for (let country of countries) {
         if(req.location.country == country.iso) { // If user country matches one of ours
-            res.setAddr(country.answer); // Set addr and ttl to response
+            res.setCNAMERecord(country.answer); // Set addr and ttl to response
             res.setTTL(country.ttl);
         }
     }
@@ -684,7 +687,7 @@ function onRequest(req: IRequest, res: IResponse) {
         );
         // If we get proper candidates list for particullar country- let's select one of them randomly
         if (geoFilteredCandidates.length) {
-            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setCNAMERecord(getRandomElement(geoFilteredCandidates).cname);
             res.setTTL(defaultTtl);
             return;
         }
@@ -696,7 +699,7 @@ And if we have the user with a country not listed at our configuration - we shou
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     ...
-    res.setAddr('answer.othercountries.net');
+    res.setCNAMERecord('answer.othercountries.net');
     res.setTTL(defaultTtl);
     return;
 }
@@ -758,12 +761,12 @@ function onRequest(req: IRequest, res: IResponse) {
         );
         // If we get proper candidates list for particular country- let's select one of them randomly
         if (geoFilteredCandidates.length) {
-            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setCNAMERecord(getRandomElement(geoFilteredCandidates).cname);
             res.setTTL(defaultTtl);
             return;
         }
     }
-    res.setAddr('answer.othercountries.net');
+    res.setCNAMERecord('answer.othercountries.net');
     res.setTTL(defaultTtl);
     return;
 }
@@ -826,14 +829,13 @@ function onRequest(req: IRequest, res: IResponse) {
     // Get the answer from fetched remote
     let answer = fetchRemote('answer');
     if(answer) { // if we got anything
-        res.setAddr(answer);
+        res.setCNAMERecord(answer);
     } else { // if not - we use fallback 
-        res.setaddr('my.fallback.org');
+        res.setCNAMERecord('my.fallback.org');
     }
     return;
 }
 ```
 Remote API answers are cached for 5 minutes, so if that API answer changes - it will take a new one after cache is expired.
  
-
 ## Good Luck!!!

@@ -102,7 +102,7 @@ If we have non-empty list of the CDN providers with required availability - we c
     // If we have a providers to choose from - choose the one with the best performance
     if (providersPerformance.length) {
         decision = getLowestByProperty(providersPerformance, 'performance').provider;
-        res.setAddr(decision.cname);
+        res.setCNAMERecord(decision.cname);
         res.setTTL(decision.ttl ? decision.ttl : defaultTtl);
         return;
     }
@@ -113,7 +113,7 @@ If no providers with the desired uptime - we just use the `default` one:
     decision = providers.find(provider => provider.name === defaultProvider);
 
     // Prepare the response
-    res.setAddr(decision.cname);
+    res.setCNAMERecord(decision.cname);
     res.setTTL(decision.ttl ? decision.ttl : defaultTtl);
     return;
 ```
@@ -185,7 +185,7 @@ function onRequest(req: IRequest, res: IResponse) {
     // If we have a providers to choose from - choose the one with the best performance for the last hour
     if (providersPerformance.length) {
         decision = getLowestByProperty(providersPerformance, 'performance').provider;
-        res.setAddr(decision.cname);
+        res.setCNAMERecord(decision.cname);
         res.setTTL(decision.ttl ? decision.ttl : defaultTtl);
         return;
     }
@@ -194,7 +194,7 @@ function onRequest(req: IRequest, res: IResponse) {
     decision = providers.find(provider => provider.name === defaultProvider);
 
     // Prepare the response
-    res.setAddr(decision.cname);
+    res.setCNAMERecord(decision.cname);
     res.setTTL(decision.ttl ? decision.ttl : defaultTtl);
     return;
 }

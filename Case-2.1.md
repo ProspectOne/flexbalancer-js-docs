@@ -49,7 +49,7 @@ function onRequest(req: IRequest, res: IResponse) {
 ```
 And all you have to do now - retreive the provider with the lowest performance value, get `cname` for the answer and finish our script:
 ```typescript
-    res.setAddr(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
+    res.setCNAMERecord(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
     res.setTTL(defaultTtl);
     return;
 ```
@@ -91,7 +91,7 @@ function onRequest(req: IRequest, res: IResponse) {
         })
     );
 
-    res.setAddr(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
+    res.setCNAMERecord(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
     res.setTTL(defaultTtl);
     return;
 }

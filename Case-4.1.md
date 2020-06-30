@@ -62,7 +62,7 @@ function onRequest(req: IRequest, res: IResponse) {
     if(userCountry && stats) { // both are determined
         const parsed = JSON.parse(stats);
         if(parsed[userCountry]) { // if there is the answer for user country
-            res.setAddr(parsed[userCountry].answers); // it is set as an answer
+            res.setCNAMERecord(parsed[userCountry].answers); // it is set as an answer
             res.setTTL(parsed[userCountry].ttl); // and we also set the corresponding TTL
             return;
         }
@@ -73,7 +73,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 And the last part - if we haven't got our list, or user's country is not in that list - we set some 'default' answer:
 ```typescript
-    res.setAddr(`othercountry.perfops.net`);
+    res.setCNAMERecord(`othercountry.perfops.net`);
     return;
 ```
 
@@ -96,12 +96,12 @@ function onRequest(req: IRequest, res: IResponse) {
     if(userCountry && stats) {
         const parsed = JSON.parse(stats);
         if(parsed[userCountry]) {
-            res.setAddr(parsed[userCountry].answers);
+            res.setCNAMERecord(parsed[userCountry].answers);
             res.setTTL(parsed[userCountry].ttl);
             return;
         }
     }
-    res.setAddr(`othercountry.perfops.net`);
+    res.setCNAMERecord(`othercountry.perfops.net`);
     return;
 }
 ```

@@ -32,13 +32,13 @@ Let's create our first Custom FlexBalancer with the simpliest logic: we will che
  */
 function onRequest(req: IRequest, res: IResponse) {
     if(fetchCdnRumUptime('jsdelivr-cdn') > 98.5) { // if jsDelivr uptime is high
-        res.setAddr('google.com'); // we set answer address to 'google.com' 
+        res.setCNAMERecord('google.com'); // we set answer address to 'google.com' 
         res.setTTL(25); // with TTL = 25
 
         return; // return answer
     }
     // if jsDelivr uptime is lower than expected
-    res.setAddr('perfops.net'); // we set answer address to 'perfops.net'
+    res.setCNAMERecord('perfops.net'); // we set answer address to 'perfops.net'
     return; // return answer
 }
 ```
@@ -75,6 +75,8 @@ So, according to rules that you have defined at Custom Answer, it should return 
 And it does! That means your FlexBalancer works perfectly!
 
 You may want to take a look at our [[Tutorial|Tutorial]] and at more complicated script samples stored at our repository.
+
+We have also prepared a small tutorial at our [Help Center](https://perfops.net/support/), that shows you [five different ways to test your flexbalancer](https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer). Hope, it will be helpful!
 
 ## Edit FlexBalancer with custom answer
 
