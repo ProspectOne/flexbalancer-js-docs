@@ -4,6 +4,8 @@
 
 [[Tutorial|Tutorial]]
 
+[[Logger Usage|Logger-Usage]]
+
 [[Custom Answers API:|Custom-Answers-API]]
 * [Interfaces](Custom-Answers-API#interfaces)
 * [Types](Custom-Answers-API#types)
@@ -28,5 +30,5 @@
 
 [[Cedexis Migration Example|Cedexis-Migration-Example]]
 
-[[How to test my FlexBalancer?](https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer)]
+[How to test my FlexBalancer?](https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer)
 

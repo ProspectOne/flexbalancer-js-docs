@@ -58,6 +58,30 @@ function onRequest(req: IRequest, res: IResponse) {
     }
 }
 ```
+**Notice**: we could use A-type record instead of CNAME, so our code would look like:
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
+        res.setARecord('192.168.1.1'); // just as sample :)
+        res.setTTL(10); // Set TTL
+
+        return;
+    }
+}
+```
+or couple of A-records for multi-record answer (**for A-type records only!**):
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
+        res.setARecord('192.168.1.1'); // just as sample :)
+        res.addARecord('192.168.1.2'); // if you need more than one - use 'addARecord' function
+        res.setTTL(10); // Set TTL
+
+        return;
+    }
+}
+```
+But here and further we will use `setCNAMERecord` function for better clarity.
 
 And if the user IP is not at that range it should return `answer.otherranges.net` with TTL 15:
 

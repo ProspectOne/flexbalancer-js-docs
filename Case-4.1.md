@@ -51,7 +51,7 @@ Then, we try to determine the user country with our `request` object:
 let userCountry = req.location.country;
 ```
 
-The next part is simple. If we have successfully retrieved our answers list (`stats` is not empty) and also wew able to determine the user country -
+The next part is simple. If we have successfully retrieved our answers list (`stats` is not empty) and also we are able to determine the user country -
 we just parse our answers JSON and check if it contains the answer for that user country. Id it does - we set that answer, TTL and finish our script:
 
 ```typescript
