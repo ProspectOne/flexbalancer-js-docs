@@ -142,7 +142,7 @@ declare interface IApplicationConfig {
     }
 }
 ```
-Used to specify remote sources.
+Used to specify remote sources. You are also able to set headers (such as `Authorization` etc).
 ***
 **ILogger** interface and constant **logger**
 
@@ -163,7 +163,7 @@ declare interface ILogger {
 ```typescript
 declare const logger: ILogger;
 ```
-Useful if you need to log any events that can be seen at the Raw Logs list of the [PerfOps Panel](https://panel.perfops.net)
+Useful when you need to log any events that can be seen at the Raw Logs list of the [PerfOps Panel](https://panel.perfops.net)
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
