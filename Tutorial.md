@@ -58,30 +58,6 @@ function onRequest(req: IRequest, res: IResponse) {
     }
 }
 ```
-**Notice**: we could use A-type record instead of CNAME, so our code would look like:
-```typescript
-function onRequest(req: IRequest, res: IResponse) {
-    if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
-        res.setARecord('192.168.1.1'); // just as sample :)
-        res.setTTL(10); // Set TTL
-
-        return;
-    }
-}
-```
-or couple of A-records for multi-record answer (**for A-type records only!**):
-```typescript
-function onRequest(req: IRequest, res: IResponse) {
-    if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
-        res.setARecord('192.168.1.1'); // just as sample :)
-        res.addARecord('192.168.1.2'); // if you need more than one - use 'addARecord' function
-        res.setTTL(10); // Set TTL
-
-        return;
-    }
-}
-```
-But here and further we will use `setCNAMERecord` function for better clarity.
 
 And if the user IP is not at that range it should return `answer.otherranges.net` with TTL 15:
 
@@ -131,6 +107,41 @@ testcustom.0b62ec.flexbalancer.net. 15 IN CNAME answer.otherranges.net.
 ```
 
 Pretty simple, isn't it?
+
+**Notice**: we could use A-type record instead of CNAME, so our code would look like:
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
+        res.setARecord('192.168.1.1'); // just as sample :)
+        res.setTTL(10); // Set TTL
+
+        return;
+    }
+}
+```
+or couple of A-records for multi-record answer (**for A-type records only!**):
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    if (isIpInRange(req.ip, ipFrom, ipTo) === true) { // Check if IP is in range
+        res.setARecord('192.168.1.1'); // just as sample :)
+        res.addARecord('192.168.1.2'); // if you need more than one - use 'addARecord' function
+        res.setTTL(10); // Set TTL
+
+        return;
+    }
+}
+```
+But here and further we use `setCNAMERecord` function for better clarity.
+
+**Important:** you **can not** mix the records of A and CNAME type, so code like:
+```typescript
+        res.setARecord('192.168.1.1');
+        res.setCNAMERecord('answer.whatever.net');
+
+        return;
+    }
+```
+Will produce the error: **Mixing of A and CNAME records is not allowed.** So be careful and avoid types mixing!
 
 ## Lesson 2: City Lookup based answer. <a name="citybased">
 

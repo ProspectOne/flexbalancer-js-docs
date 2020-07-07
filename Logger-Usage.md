@@ -44,3 +44,26 @@ Apply any filters and take a look at raw logs section below:
 ![Alt text](img/logger_4.png?raw=true "Log info")
 
 So, now you can log different events depending on your FlexBalancer logic and needs!
+
+Let's make an error and log it. Mixing of A and CNAME records is not allowed for our responses, so the code below will definitely produce an error:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    try {
+        res.setARecord('192.168.1.1');
+        res.setCNAMERecord('do.something.for.test.net'); 
+    } catch(error) {
+        logger.write(error.message); // Here we log our error 
+    }
+    return; // return answer
+}
+```
+Let's publish and test this balancer. Dig returns:
+ 
+![Alt text](img/logger_5.png?raw=true "Dig")
+
+And if we look at our raw logs - we will see our 'caught' error message:
+
+![Alt text](img/logger_6.png?raw=true "Error")
+
+Easy and helpful, isnt' it?
