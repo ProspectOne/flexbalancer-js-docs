@@ -4,8 +4,6 @@
 
 [[Tutorial|Tutorial]]
 
-[[Logger Usage|Logger-Usage]]
-
 [[Custom Answers API:|Custom-Answers-API]]
 * [Interfaces](Custom-Answers-API#interfaces)
 * [Types](Custom-Answers-API#types)
@@ -18,6 +16,7 @@
 * [[Case 3.1: Geolocation with excluded country.|Case-3.1]]
 * [[Case 3.2: The specific answer for the specific region.|Case-3.2]]
 * [[Case 3.3: The provider with the best performance for visitor's country.|Case-3.3]]
+* [[Case 4.1: Using country-based answers from remote sources.|Case-4.1]]
 
 [[Advanced Solutions:|Advanced-Solutions]]
 
@@ -26,9 +25,12 @@
 * [[Solution 3: The Weighted Random Selection.|Solution-3]]
 * [[Solution 4: Multi Geo-Random with Monitor Overrides.|Solution-4]]
 
+[How to use Logger?](https://perfops.net/support/flexbalancers/how-to-use-logger-for-custom-flexbalancers)
+
 [[Set up VSCode|Setting-up-VSCode]]
 
 [[Cedexis Migration Example|Cedexis-Migration-Example]]
 
 [How to test my FlexBalancer?](https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer)
+
 
