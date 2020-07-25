@@ -98,7 +98,7 @@ function onRequest(request: IRequest, response: IResponse) {
     if (geoOverride) {
         let resGeo = getGeoResponse(location);
         if (resGeo) {
-            response.setAddr(resGeo.addr);
+            response.setCNAMERecord(resGeo.addr);
             response.setTTL(resGeo.ttl);
             return;
         }
@@ -108,7 +108,7 @@ function onRequest(request: IRequest, response: IResponse) {
     if (asnOverride && location.subnet.asn) {
         candidate = findByProperty(providers, 'name', asnToProvider[location.subnet.asn]);
         if (candidate) {
-            response.setAddr(candidate.cname);
+            response.setCNAMERecord(candidate.cname);
             response.setTTL(defaultTtl);
             return;
         }
@@ -156,7 +156,7 @@ function onRequest(request: IRequest, response: IResponse) {
                     fetchCdnRumPerformance(provider.name)) * (1 + provider.padding / 100)
             })
         );
-        response.setAddr(getLowestByProperty(performanceMapData, 'cdnPerformance').provider.cname);
+        response.setCNAMERecord(getLowestByProperty(performanceMapData, 'cdnPerformance').provider.cname);
         response.setTTL(defaultTtl);
         return;
     }
@@ -166,7 +166,7 @@ function onRequest(request: IRequest, response: IResponse) {
     if (geoDefault) {
         let res = getGeoResponse(location);
         if (res) {
-            response.setAddr(res.addr);
+            response.setCNAMERecord(res.addr);
             response.setTTL(res.ttl);
             return;
         }
@@ -175,7 +175,7 @@ function onRequest(request: IRequest, response: IResponse) {
     //return default
     candidate = findByProperty(providers, 'name', defaultProvider);
     if (candidate){
-        response.setAddr(candidate);
+        response.setCNAMERecord(candidate);
         response.setTTL(defaultTtl);
         return;
     }

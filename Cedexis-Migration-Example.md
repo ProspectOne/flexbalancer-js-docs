@@ -479,7 +479,7 @@ If `availableProviders` is empty, so no providers match our criteria - we pick a
 ```typescript
     // 'Bad' uptime, return random provider from available.
     if (!availableProviders.length) { // availableProviders
-        response.setAddr(getRandom(providers).cname);
+        response.setCNAMERecord(getRandom(providers).cname);
         response.setTTL(defaultTtl);
         return;
     }
@@ -556,7 +556,7 @@ We are done with our functions, let's get back to our `onRequest` section and us
 ```
 And finally - return the best one, using `getHighest` function:
 ```typescript
-    response.setAddr(cdnPerformanceData[getHighest(totalScores)].provider.cname);
+    response.setCNAMERecord(cdnPerformanceData[getHighest(totalScores)].provider.cname);
     response.setTTL(defaultTtl);
     return;
 ```
@@ -684,7 +684,7 @@ function onRequest(request: IRequest, response: IResponse) {
 
     // 'Bad' uptime, return random provider from available.
     if (!availableProviders.length) { // availableProviders
-        response.setAddr(getRandom(providers).cname);
+        response.setCNAMERecord(getRandom(providers).cname);
         response.setTTL(defaultTtl);
         return;
     }
@@ -708,7 +708,7 @@ function onRequest(request: IRequest, response: IResponse) {
     );
 
     // Return as default, provider with highest score
-    response.setAddr(cdnPerformanceData[getHighest(totalScores)].provider.cname);
+    response.setCNAMERecord(cdnPerformanceData[getHighest(totalScores)].provider.cname);
     response.setTTL(defaultTtl);
     return;
 }

@@ -59,13 +59,13 @@ function onRequest(req: IRequest, res: IResponse) {
         );
         // Set the response TTL to the default TTL, select the provider with the best uptime value
         // and set the response Address to the cname associated with that provider
-        res.setAddr(getHighestByProperty(CDNUptimeData, 'uptime').provider.cname);
+        res.setCNAMERecord(getHighestByProperty(CDNUptimeData, 'uptime').provider.cname);
         res.setTTL(defaultTtl);
         return;
     }
     // If we have single available provider simply set the defaultTTL and cname of that provider as Addr
     if (availableProviders.length === 1) {
-        res.setAddr(availableProviders[0].cname);
+        res.setCNAMERecord(availableProviders[0].cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -81,7 +81,7 @@ function onRequest(req: IRequest, res: IResponse) {
         }
     }
     // Set the response TTL to the default TTL, and Addr to the cname associated with the chosen provider
-    res.setAddr(availableProviders[weightedProviderIndex].cname);
+    res.setCNAMERecord(availableProviders[weightedProviderIndex].cname);
     res.setTTL(defaultTtl);
     return;
 }

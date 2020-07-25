@@ -81,7 +81,7 @@ If we get the user from Poland or Japan and the validation of the candidate(cand
 ```typescript
         // If we found proper geo candidates, pick one of them randomly and use cname for the answer
         if (geoFilteredCandidates.length) {
-            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setCNAMERecord(getRandomElement(geoFilteredCandidates).cname);
             res.setTTL(defaultTtl);
             return;
         }
@@ -93,7 +93,7 @@ If the user is from any other country, or country is 'unknown' - we pick random 
 
     //Choose random candidate cname as response Addr (if we have any)
     if (properCandidates.length) {
-        res.setAddr(getRandomElement(properCandidates).cname);
+        res.setCNAMERecord(getRandomElement(properCandidates).cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -101,7 +101,7 @@ If the user is from any other country, or country is 'unknown' - we pick random 
 In case all monitors are offline - we use the `fallback`:
 ```typescript
     // If not - set fallback 
-    res.setAddr('our.fallback.com');
+    res.setCNAMERecord('our.fallback.com');
     res.setTTL(defaultTtl);
     return;
 ```
@@ -164,7 +164,7 @@ function onRequest(req: IRequest, res: IResponse) {
         );
         // If we found proper geo candidates, pick one of them randomly and use cname for the answer
         if (geoFilteredCandidates.length) {
-            res.setAddr(getRandomElement(geoFilteredCandidates).cname);
+            res.setCNAMERecord(getRandomElement(geoFilteredCandidates).cname);
             res.setTTL(defaultTtl);
             return;
         }
@@ -175,12 +175,12 @@ function onRequest(req: IRequest, res: IResponse) {
 
     //Choose random candidate cname as response Addr (if we have any)
     if (properCandidates.length) {
-        res.setAddr(getRandomElement(properCandidates).cname);
+        res.setCNAMERecord(getRandomElement(properCandidates).cname);
         res.setTTL(defaultTtl);
         return;
     }
     // If not - set fallback 
-    res.setAddr('our.fallback.com');
+    res.setCNAMERecord('our.fallback.com');
     res.setTTL(defaultTtl);
     return;
 }

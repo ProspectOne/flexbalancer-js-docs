@@ -9,12 +9,13 @@ With the Custom Code FlexBalancer feature you are able to write your own javascr
 * [Create your PerfOps account](https://panel.perfops.net/register) (if you don't have it yet)
 * [[Create your first FlexBalancer with Custom Answer|Quick-Start]]
 * [[Learn how to create your custom scripts|Tutorial]]
+* <a href="https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer" target="_blank">5 ways to test your FlexBalancer</a>
 
 # Next steps
 
 * [[Use all benefits of Custom Answers API|Custom-Answers-API]]
 * [[Set up IDE text editor (VSCode)|Setting-up-VSCode]]
 * [[Basic Use Cases|Basic-Use-Cases]]
+* <a href="https://perfops.net/support/flexbalancers/how-to-use-logger-for-custom-flexbalancers" target="_blank">How to use Logger and PerfOps Raw logs</a>
 * [[Advanced Solutions|Advanced-Solutions]]
 * [[Cedexis Migration Example|Cedexis-Migration-Example]]
-

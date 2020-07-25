@@ -48,7 +48,7 @@ function onRequest(req: IRequest, res: IResponse) {
     );
     // If all monitors states are 'DOWN', choose random provider.
     if (monitorFilteredProviders.length === 0) {
-        res.setAddr(providers[Math.floor(Math.random() * providers.length)].cname);
+        res.setCNAMERecord(providers[Math.floor(Math.random() * providers.length)].cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -67,7 +67,7 @@ function onRequest(req: IRequest, res: IResponse) {
         );
         // Set the response TTL to the defaultTtl, select the provider with the best (lowest) performance value
         // and set the response Address to the cname associated with that provider
-        res.setAddr(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
+        res.setCNAMERecord(getLowestByProperty(perfProvidersData, 'perf').provider.cname);
         res.setTTL(defaultTtl);
         return;
     }
@@ -81,7 +81,7 @@ function onRequest(req: IRequest, res: IResponse) {
     );
     // Set the response TTL to the defaultTtl and the response Address to the cname
     // associated with the provider with the best uptime
-    res.setAddr(getHighestByProperty(uptimeProvidersData, 'uptime').provider.cname);
+    res.setCNAMERecord(getHighestByProperty(uptimeProvidersData, 'uptime').provider.cname);
     res.setTTL(defaultTtl);
     return;
 }

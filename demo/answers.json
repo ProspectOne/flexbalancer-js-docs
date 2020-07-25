@@ -1,0 +1,10 @@
+{
+  "UA": {
+    "ttl": 20,
+    "answers": "UA.perfops.net"
+  },
+  "PL": {
+    "ttl": 25,
+    "answers": "pl.perfops.net"
+  }
+}

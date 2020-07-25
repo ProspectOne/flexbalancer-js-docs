@@ -9,11 +9,13 @@ With the Custom Code FlexBalancer feature you are able to write your own javascr
 * [Create your PerfOps account](https://panel.perfops.net/register) (if you don't have it yet)
 * [Create your first FlexBalancer with Custom Answer](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Quick-Start)
 * [Learn how to create your custom scripts](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Tutorial)
+* <a href="https://perfops.net/support/flexbalancers/how-to-test-my-flexbalancer" target="_blank">5 ways to test your FlexBalancer</a>
 
 # Next steps
 
 * [Use all benefits of Custom Answers API](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Custom-Answers-API)
 * [Set up IDE text editor (VSCode)](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Setting-up-VSCode)
 * [Basic Use Cases](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Basic-Use-Cases)
+* [How to use Logger and PerfOps Raw logs](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Logger-Usage)
 * [Advanced Solutions](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Advanced-Solutions)
 * [Cedexis Migration Example](https://github.com/ProspectOne/flexbalancer-js-docs/wiki/Cedexis-Migration-Example)

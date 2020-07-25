@@ -18,6 +18,7 @@
         * [lookupAsn](#lookupasn)
         * [isIpInRange](#isipinrange)
         * [isIpInMask](#isipinmask)
+        * [fetchRemote](#fetchremote)
 
 ## Application 
 
@@ -36,20 +37,37 @@ For example, you want to set particular answer for users from `France`.
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     if(req.location.country && req.location.country == 'FR') {
-        res.setAddr('answer.mysite.fr');
+        res.setCNAMERecord('answer.mysite.fr');
         res.setTTL(25);
 
         return;
     }
 
-    res.setAddr('mysite.net');
+    res.setCNAMERecord('mysite.net');
     return;
 }
 ```
 
-The interfaces implemented by `request` and `response` : 
+### onSetup Function
+
+**onSetup(): IApplicationConfig**
+
+This function is mostly used for adding remote sources (external APIs etc):
+
+```typescript
+function onSetup():IApplicationConfig {
+    return {
+        remotes: {
+            // Set up remote data source
+            'mydata': { url: 'https://get.some.important.data.com/test.json' }
+        }
+    }
+}
+```
 
 ### Interfaces
+
+The interfaces implemented by `request` and `response` : 
 
 **IRequest**
 
@@ -87,14 +105,19 @@ declare interface IRequest {
 ```typescript
 declare interface IResponse {
     /**
-    * Set the result to a single address
+    * Set the result to a single A record
     */
-    setAddr(addr: string): void;
+    setARecord(addr: string): void;
 
     /**
-     * Add address to the results for a multi-address answer
+     * Add address to the results for a multi-record (A-records) answer
      */
-    addAddr(addr: string): void;
+    addARecord(addr: string): void;
+
+    /**
+     * Set CNAME record as an answer
+     */
+    setCNAMERecord(hostname: string): void;
 
     /**
      * Time to live in seconds
@@ -102,7 +125,59 @@ declare interface IResponse {
     setTTL(ttl: number): void;
 }
 ```
-Types that are used at that interfaces are listed at the section below.
+***
+**IApplicationConfig**
+
+The interface that `onSetup` function returns.
+
+```typescript
+declare interface IApplicationConfig {
+    remotes?: {
+        [key: string]: {
+            url: string
+            headers?: {
+                [key: string]: string;
+            }
+        }
+    }
+}
+```
+Used to specify remote sources. You are also able to set headers (such as `Authorization` etc).
+***
+**ILogger** interface and constant **logger**
+
+```typescript
+/**
+ * Logger interface
+ */
+declare interface ILogger {
+    /**
+     * Write a message to the log.
+     *
+     * Logged messages will be visible in the Raw Logs for
+     * current Flex Balancer in the Panel
+     */
+    write(message: string): void;
+}
+```
+```typescript
+declare const logger: ILogger;
+```
+Useful when you need to log any events that can be seen at the Raw Logs list of the [PerfOps Panel](https://panel.perfops.net)
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    ...
+    // Write log
+    logger.write('start processing');
+    ...
+    logger.write('finished');
+    ...
+}
+```
+
+***
+Types that are used at `IRequest` and `IResponse` interfaces are listed at the section below.
 
 ## Provided functions
 
@@ -284,7 +359,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Returns world uptime value for the particular CDN provider. [The higher value - the better uptime.](https://www.cdnperf.com/#!rum)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -307,7 +382,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns location-based uptime value for the particular CDN provider. [The higher value - the better uptime.](https://www.cdnperf.com/#!rum)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -326,7 +401,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Similar to the previous function but returns World RUM Performance value. [The lower value - the better performance.](https://www.cdnperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -349,7 +424,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns the location-based CDN performance value. [The lower value - the better performance.](https://www.cdnperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -368,7 +443,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Returns world uptime value for the particular Cloud provider. [The higher value - the better uptime.](https://www.cloudperf.com/?s=uptime)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -392,7 +467,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns location-based uptime value for the particular Cloud provider. [The higher value - the better uptime.](https://www.cloudperf.com/?s=uptime)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -412,7 +487,7 @@ function onRequest(req: IRequest, res: IResponse) {
 
 Similar to the previous function but returns the World Performance (Latency) value. [The lower value - the better performance.](https://www.cloudperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -436,7 +511,7 @@ This function also accepts additional parameters `selector` and `identifier`:
 
 Returns the location-based Cloud performance (Latency) value. [The lower value - the better performance.](https://www.cloudperf.com/)
 
-**The data represents the last hour and is collected every minute.**
+**The data represents the average statistics for the last 10 minutes and is requested every minute.**
 
 Example:
 
@@ -637,7 +712,7 @@ Example:
 
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
-    let ipBelongsTo = await lookupContinent(req.ip, 'SA', 10);
+    let ipBelongsTo = lookupContinent(req.ip, 'SA', 10);
     if(ipBelongsTo === true) {
     ...
     }
@@ -705,11 +780,31 @@ Example:
 ```typescript
 function onRequest(req: IRequest, res: IResponse) {
     if(isIpInMask(req.ip, '145.2.3.4/16')) {
-        res.setAddr(['mask16.com']);
+        res.setCNAMERecord(['mask16.com']);
         res.setTTL(30);
         ...​
         return;
     }
 ...
+}
+```
+***
+**fetchRemote(name: string): string | null** <a name="fetchremote"></a>
+
+* **name** - *(string)* - the name of the remote source, defined by `onSetup` Application function
+
+Returns remote source response.
+
+Example:
+
+```typescript
+function onRequest(req: IRequest, res: IResponse) {
+    // Collect data from fetched remote
+    let stats = fetchRemote('mydata');
+    if(stats) {
+        logger.write('stats fetched');
+        ...
+    }
+    ...
 }
 ```
